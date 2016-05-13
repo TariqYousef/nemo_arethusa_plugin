@@ -2,21 +2,30 @@ from flask_nemo.plugin import PluginPrototype
 from MyCapytain.resources.texts.api import Text
 from MyCapytain.common.reference import URN
 from flask_nemo.query.proto import QueryPrototype
+from flask_nemo.query.annotation import AnnotationResource
+
 from pkg_resources import resource_filename
 
 
 class ArethusaSimpleQuery(QueryPrototype):
     """ Query Interface for hardcoded annotations.
 
-    :param annotations: Dictionary of {CTS URN : annotations with URIs to resolve as resource to get}
-    :type annotations:{str : str}
+    :param annotations: List of tuple of (CTS URN Targeted, URI of the Annotation, Type of the annotation
+    :type annotations: [(str, str, str)]
+    :param resolver: Resolver
+    :type resolver: Resolver
     """
     
     def __init__(self, annotations, resolver=None):
         super(ArethusaSimpleQuery, self).__init__(None)
-        self.__annotations__ = annotations
+        self.__annotations__ = []
         self.__nemo__ = None
         self.__resolver__ = resolver
+
+        for target, body, type_uri in annotations:
+            self.__annotations__.append(AnnotationResource(
+                body, target, type_uri, self.__resolver__
+            ))
 
     def process(self, nemo):
         """ Register nemo and parses annotations
@@ -24,25 +33,31 @@ class ArethusaSimpleQuery(QueryPrototype):
         :param nemo: Nemo
         """
         self.__nemo__ = nemo
-        annotations = dict()
-        for urn_str, annotation in self.__annotations__.items():
-            urn = URN(urn_str)
+        for annotation in self.__annotations__:
+            annotation.target.expanded = frozenset(self.__getinnerreffs__(
+                text=self.__getText__(annotation.target.urn),
+                urn=annotation.target.urn
+            ))
 
-            for suburn in self.__getinnerreffs__(
-                text=self.__nemo__.get_text(
-                    urn.namespace,
-                    urn.textgroup,
-                    urn.work,
-                    urn.version
-                ),
-                urn=urn
-            ):
-                annotations[suburn] = annotation
-        self.__annotations__ = annotations
+    def __getText__(self, urn):
+        """ Return a metadata text object
+
+        :param urn: URN object of the passage
+        :return: Text
+        """
+        return self.__nemo__.get_text(
+            urn.namespace,
+            urn.textgroup,
+            urn.work,
+            urn.version
+        )
 
     @property
     def annotations(self):
         return self.__annotations__
+
+    def getAnnotation(self, uri):
+        return [annotation for annotation in self.annotations if annotation.uri == uri][0]
 
     def getAnnotations(self,
             *urns,
@@ -50,14 +65,27 @@ class ArethusaSimpleQuery(QueryPrototype):
             limit=None, start=1,
             expand=False, **kwargs
         ):
-        pass
+        annotations = []
+        for urn in urns:
+            _urn = URN(urn)
+            if _urn.reference.end:
+                urns_in_range = self.__getinnerreffs__(
+                    text=self.__getText__(_urn),
+                    urn=_urn
+                )
+            else:
+                urns_in_range = [urn]
 
-    def __partOf__(self, source, annotations):
-        """ See if some annotations are part of the list found
+            urns_in_range = frozenset(urns_in_range)
+            annotations.extend([
+                annotation
+                for annotation in self.annotations
+                if bool(urns_in_range.intersection(annotation.target.expanded))
+            ])
 
-        :return:
-        """
-        pass
+        annotations = list(set(annotations))
+
+        return len(annotations), sorted(annotations, key=lambda x: x.uri)
 
     def __getinnerreffs__(self, text, urn):
         """ Resolve the list of urns between in a range
