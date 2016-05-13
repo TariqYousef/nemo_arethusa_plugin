@@ -14,7 +14,7 @@ setup(
         "flask_nemo>=1.0.0a"
     ],
     tests_require=[
-        "capitains_nautilus>=0.0.4"
+        "capitains_nautilus>=0.0.5"
     ],
     include_package_data=True,
     zip_safe=False

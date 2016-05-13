@@ -26,7 +26,6 @@ class ArethusaSimpleQuery(QueryPrototype):
         self.__nemo__ = nemo
         annotations = dict()
         for urn_str, annotation in self.__annotations__.items():
-            print(urn_str)
             urn = URN(urn_str)
 
             for suburn in self.__getinnerreffs__(
@@ -40,7 +39,11 @@ class ArethusaSimpleQuery(QueryPrototype):
             ):
                 annotations[suburn] = annotation
         self.__annotations__ = annotations
-    
+
+    @property
+    def annotations(self):
+        return self.__annotations__
+
     def getAnnotations(self,
             *urns,
             wildcard=".", include=None, exclude=None,
@@ -68,8 +71,6 @@ class ArethusaSimpleQuery(QueryPrototype):
             self.__nemo__.retriever,
             citation=text.citation
         )
-        print(type(urn.reference))
-        print(text.getValidReff(reference=urn.reference, level=3))
         return text.getValidReff(reference=urn.reference, level=len(text.citation))
 
 

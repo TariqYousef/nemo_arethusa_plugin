@@ -16,4 +16,7 @@ class TestQueryInterface(TestCase):
         nemo = make_client(output_nemo=True)[0]
         query.process(nemo)
 
-        print(query.__annotations__)
+        self.assertEqual(
+            query.annotations["urn:cts:latinLit:phi1294.phi002.perseus-lat2:1.pr.2"], "treebanks/treebank2.xml",
+            "URNs should have been expanded"
+        )
