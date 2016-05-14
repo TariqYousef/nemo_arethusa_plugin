@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name='nemo_arethusa_plugin',
-    version="1.0.0",
-    packages=find_packages(exclude=["examples"]),
+    version="0.0.1",
+    packages=find_packages(exclude=["examples", "tests"]),
     url='https://github.com/alpheios/nemo_arethusa_plugin',
     license='GNU GPL',
     author='Thibault Clerice',

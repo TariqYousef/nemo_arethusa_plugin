@@ -3,6 +3,7 @@ from MyCapytain.resources.texts.api import Text
 from MyCapytain.common.reference import URN
 from flask_nemo.query.proto import QueryPrototype
 from flask_nemo.query.annotation import AnnotationResource
+from flask import url_for, jsonify
 
 from pkg_resources import resource_filename
 
@@ -107,6 +108,19 @@ class Arethusa(PluginPrototype):
 
     """
     HAS_AUGMENT_RENDER = True
+    JS = [
+        resource_filename("nemo_arethusa_plugin", "data/assets/js/arethusa.widget.js"),
+        resource_filename("nemo_arethusa_plugin", "data/assets/js/arethusa.min.js")
+    ]
+    CSS = [
+        resource_filename("nemo_arethusa_plugin", "data/assets/css/arethusa.min.css"),
+        resource_filename("nemo_arethusa_plugin", "data/assets/css/foundation-icon.css"),
+        resource_filename("nemo_arethusa_plugin", "data/assets/css/font-awesome.min.css"),
+        resource_filename("nemo_arethusa_plugin", "data/assets/css/colorpicker.css")
+    ]
+    TEMPLATES = {
+        "arethusa": resource_filename("nemo_arethusa_plugin", "data/templates")
+    }
     
     def __init__(self, interface, *args, **kwargs):
         super(Arethusa, self).__init__(*args, **kwargs)
@@ -115,3 +129,29 @@ class Arethusa(PluginPrototype):
     @property
     def interface(self):
         return self.__interface__
+
+    def render(self, **kwargs):
+        update = dict()
+        if "template" in kwargs and kwargs["template"] == "main::text.html":
+            update["template"] = "arethusa::text.html"
+        else:
+            # Clean CSS and JS calls
+            pass
+        return update
+
+    def r_config(self):
+        """ Return the json config of dependencies
+
+        :return:
+        """
+        return jsonify({
+            "css": {
+                "arethusa": url_for(".secondary_assets", asset="arethusa.min.css", filetype="css"),
+                "foundation": url_for(".secondary_assets", asset="foundation-icons.css", filetype="css"),
+                "font_awesome": url_for(".secondary_assets", asset="font-awesome.min.css", filetype="css"),
+                "colorpicker": url_for(".secondary_assets", asset="colorpicker.css", filetype="css")
+            },
+            "js": {
+                "arethusa": url_for(".secondary_assets", asset="arethusa.min.js", filetype="css")
+            }
+        })

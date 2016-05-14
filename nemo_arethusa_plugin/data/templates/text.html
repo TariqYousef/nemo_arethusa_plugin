@@ -1,0 +1,33 @@
+{% from "main::text.html" import show_passage with context %}
+
+{% extends "main::container.html" %}
+
+{% macro tb_macro() %}
+<div id="treebank_container">It should be overloaded by javascript</div>
+{% endmacro %}
+
+{% macro tabs(text, treebank) %}
+    <div style="margin:10px 0;">
+
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Text</a></li>
+        <li role="presentation"><a href="#treebank" aria-controls="treebank" role="tab" data-toggle="tab">Treebank</a></li>
+      </ul>
+
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="home">
+            {{ text }}
+        </div>
+        <div role="tabpanel" class="tab-pane" id="treebank">
+            {{ treebank }}
+        </div>
+      </div>
+
+    </div>
+{% endmacro %}
+
+{% block article %}
+{{ show_passage(tabs(text_passage, tb_macro())) }}
+{% endblock %}
