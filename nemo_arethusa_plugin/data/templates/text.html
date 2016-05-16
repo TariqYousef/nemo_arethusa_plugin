@@ -1,9 +1,11 @@
-{% from "main::text.html" import show_passage with context %}
+{% from "main::text.html" import show_passage, header_passage, default_footer, nav with context %}
 
 {% extends "main::container.html" %}
 
 {% macro tb_macro() %}
-<div id="treebank_container">It should be overloaded by javascript</div>
+<div id="treebank_container">It should be overloaded by javascript
+{{ annotations }}
+</div>
 {% endmacro %}
 
 {% macro tabs(text, treebank) %}
@@ -29,5 +31,5 @@
 {% endmacro %}
 
 {% block article %}
-{{ show_passage(tabs(text_passage, tb_macro())) }}
+{{ show_passage(tabs(text_passage, tb_macro()), navigation=nav(), header=header_passage(), footer=default_footer())git  }}
 {% endblock %}

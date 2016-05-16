@@ -23,7 +23,7 @@ nemo = Nemo(
     base_url="",
     retriever=NautilusDummy,
     chunker={"default": lambda x, y: level_grouper(x, y, groupby=30)},
-    plugins=[Arethusa(interface=query)]
+    plugins=[Arethusa(queryinterface=query)]
 )
 query.process(nemo)
 app.run()

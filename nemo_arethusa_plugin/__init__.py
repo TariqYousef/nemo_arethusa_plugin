@@ -1,4 +1,4 @@
-from flask_nemo.plugin import PluginPrototype
+from flask_nemo.plugins.annotations_api import AnnotationsApiPlugin
 from MyCapytain.resources.texts.api import Text
 from MyCapytain.common.reference import URN
 from flask_nemo.query.proto import QueryPrototype
@@ -57,7 +57,7 @@ class ArethusaSimpleQuery(QueryPrototype):
     def annotations(self):
         return self.__annotations__
 
-    def getAnnotation(self, uri):
+    def getResource(self, uri):
         return [annotation for annotation in self.annotations if annotation.uri == uri][0]
 
     def getAnnotations(self,
@@ -68,14 +68,17 @@ class ArethusaSimpleQuery(QueryPrototype):
         ):
         annotations = []
         for urn in urns:
-            _urn = URN(urn)
+            if not isinstance(urn, URN):
+                _urn = URN(urn)
+            else:
+                _urn = urn
             if _urn.reference.end:
                 urns_in_range = self.__getinnerreffs__(
                     text=self.__getText__(_urn),
                     urn=_urn
                 )
             else:
-                urns_in_range = [urn]
+                urns_in_range = [str(urn)]
 
             urns_in_range = frozenset(urns_in_range)
             annotations.extend([
@@ -103,40 +106,49 @@ class ArethusaSimpleQuery(QueryPrototype):
         return text.getValidReff(reference=urn.reference, level=len(text.citation))
 
 
-class Arethusa(PluginPrototype):
+class Arethusa(AnnotationsApiPlugin):
     """ Arethusa plugin for Nemo
 
     """
     HAS_AUGMENT_RENDER = True
+    CSS_FILENAMES = ["arethusa.min.css", "foundation-icon.css", "font-awesome.min.css", "colorpicker.css"]
+    JS_FILENAMES = ["arethusa.widget.js", "arethusa.min.js"]
     JS = [
-        resource_filename("nemo_arethusa_plugin", "data/assets/js/arethusa.widget.js"),
-        resource_filename("nemo_arethusa_plugin", "data/assets/js/arethusa.min.js")
+        resource_filename("nemo_arethusa_plugin", "data/assets/js/{0}".format(filename))
+        for filename in JS_FILENAMES
     ]
     CSS = [
-        resource_filename("nemo_arethusa_plugin", "data/assets/css/arethusa.min.css"),
-        resource_filename("nemo_arethusa_plugin", "data/assets/css/foundation-icon.css"),
-        resource_filename("nemo_arethusa_plugin", "data/assets/css/font-awesome.min.css"),
-        resource_filename("nemo_arethusa_plugin", "data/assets/css/colorpicker.css")
+        resource_filename("nemo_arethusa_plugin", "data/assets/css/{0}".format(filename))
+        for filename in CSS_FILENAMES
     ]
     TEMPLATES = {
         "arethusa": resource_filename("nemo_arethusa_plugin", "data/templates")
     }
     
-    def __init__(self, interface, *args, **kwargs):
-        super(Arethusa, self).__init__(*args, **kwargs)
-        self.__interface__ = interface
+    def __init__(self, queryinterface, *args, **kwargs):
+        super(Arethusa, self).__init__(queryinterface=queryinterface, *args, **kwargs)
+        self.__interface__ = queryinterface
 
     @property
     def interface(self):
         return self.__interface__
 
     def render(self, **kwargs):
-        update = dict()
+        update = kwargs
         if "template" in kwargs and kwargs["template"] == "main::text.html":
-            update["template"] = "arethusa::text.html"
-        else:
-            # Clean CSS and JS calls
-            pass
+            total, update["annotations"] = self.interface.getAnnotations(kwargs["urn"])
+
+            if total > 0:
+                update["template"] = "arethusa::text.html"
+            else:
+                del update["annotations"]
+
+        if "annotations" not in update:
+            for name, directory in kwargs["assets"]["css"].items():
+                if name in ["arethusa.min.css", "foundation-icon.css", "font-awesome.min.css", "colorpicker.css"]:
+                    del kwargs["assets"]["css"][name]
+                update["assets"] = kwargs["assets"]
+
         return update
 
     def r_config(self):
