@@ -26,10 +26,17 @@
             {{ treebank }}
         </div>
       </div>
-
+        <script type="text/javascript">
+            loadArethusaWidget(
+                "treebank",
+                {{ url_for(".r_annotation_get", uri=treebank) }},
+                "http://localhost:8090/configs/widget.tree.json",
+                {{ url_for(".r_arethusa_dependencies") }}
+            );
+        </script>
     </div>
 {% endmacro %}
 
 {% block article %}
-{{ show_passage(tabs(text_passage, tb_macro()), navigation=nav(), header=header_passage(), footer=default_footer())git  }}
+{{ show_passage(tabs(text_passage, tb_macro()), navigation=nav(), header=header_passage(), footer=default_footer())  }}
 {% endblock %}

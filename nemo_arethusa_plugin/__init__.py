@@ -112,7 +112,7 @@ class Arethusa(AnnotationsApiPlugin):
     """
     HAS_AUGMENT_RENDER = True
     CSS_FILENAMES = ["arethusa.min.css", "foundation-icon.css", "font-awesome.min.css", "colorpicker.css"]
-    JS_FILENAMES = ["arethusa.widget.js", "arethusa.min.js"]
+    JS_FILENAMES = ["arethusa.widget.js", "arethusa.min.js", "arethusa.packages.min.js"]
     JS = [
         resource_filename("nemo_arethusa_plugin", "data/assets/js/{0}".format(filename))
         for filename in JS_FILENAMES
@@ -145,13 +145,16 @@ class Arethusa(AnnotationsApiPlugin):
 
         if "annotations" not in update:
             for name, directory in kwargs["assets"]["css"].items():
-                if name in ["arethusa.min.css", "foundation-icon.css", "font-awesome.min.css", "colorpicker.css"]:
+                if name in Arethusa.CSS_FILENAMES:
                     del kwargs["assets"]["css"][name]
-                update["assets"] = kwargs["assets"]
+            for name, directory in kwargs["assets"]["js"].items():
+                if name in Arethusa.JS_FILENAMES:
+                    del kwargs["assets"]["js"][name]
+            update["assets"] = kwargs["assets"]
 
         return update
 
-    def r_config(self):
+    def r_arethusa_dependencies(self):
         """ Return the json config of dependencies
 
         :return:
@@ -164,6 +167,7 @@ class Arethusa(AnnotationsApiPlugin):
                 "colorpicker": url_for(".secondary_assets", asset="colorpicker.css", filetype="css")
             },
             "js": {
-                "arethusa": url_for(".secondary_assets", asset="arethusa.min.js", filetype="css")
+                "arethusa": url_for(".secondary_assets", asset="arethusa.min.js", filetype="js"),
+                "packages": url_for(".secondary_assets", asset="arethusa.packages.min.js", filetype="js")
             }
         })

@@ -15,8 +15,8 @@ NautilusDummy = NautilusRetriever(
 app = Flask("Nemo")
 app.debug = True
 query = ArethusaSimpleQuery([
-    ("urn:cts:latinLit:phi1294.phi002.perseus-lat2:1.pr.1-1.pr.5", "treebanks/treebank2.xml", TB_URI),
-    ("urn:cts:latinLit:phi1294.phi002.perseus-lat2:1.5", "treebanks/treebank1.xml", TB_URI)
+    ("urn:cts:latinLit:phi1294.phi002.perseus-lat2:6.1", "treebanks/treebank1.xml", TB_URI),
+    ("urn:cts:latinLit:phi1294.phi002.perseus-lat2:1.5", "treebanks/treebank2.xml", TB_URI)
 ], resolver=Resolver(LocalRetriever(path="./tests/test_data/")))
 nemo = Nemo(
     app=app,
