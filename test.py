@@ -19,7 +19,7 @@ query = SimpleQuery(
     [
         ("urn:cts:latinLit:phi1294.phi002.perseus-lat2:6.1", "treebanks/treebank1.xml", TB_URI),
         ("urn:cts:latinLit:phi1294.phi002.perseus-lat2:1.5", "treebanks/treebank2.xml", TB_URI),
-        ("urn:cts:latinLit:phi1294.phi002.perseus-lat2:6.52", "images/N0060308_TIFF_145_145.tif", "dc:image")
+        ("urn:cts:latinLit:phi1294.phi002.perseus-lat2:6.1", "images/N0060308_TIFF_145_145.tif", "dc:image")
     ],
     resolver=Resolver(LocalRetriever(path="./tests/test_data/"))
 )
