@@ -6,6 +6,10 @@ from pkg_resources import resource_filename
 class Arethusa(AnnotationsApiPlugin):
     """ Arethusa plugin for Nemo
 
+    .. note:: This class inherits some routes from the base `AnnotationsApiPluigin <http://flask-capitains-nemo.readthedocs.io/en/1.0.0b-dev/Nemo.api.html#flask.ext.nemo.plugins.annotations_api.AnnotationsApiPlugin>`_
+
+    :param queryinterface: QueryInterface to use to retrieve annotations
+    :type queryinterface: flask_nemo.query.proto.
     """
     HAS_AUGMENT_RENDER = True
     CSS_FILENAMES = ["arethusa.min.css", "foundation-icon.css", "font-awesome.min.css", "colorpicker.css"]
@@ -77,7 +81,18 @@ class Arethusa(AnnotationsApiPlugin):
         }
 
     @staticmethod
-    def f_annotation_filter(annotations, type_uri, number, attr=None):
+    def f_annotation_filter(annotations, type_uri, number):
+        """ Annotation filtering filter
+
+        :param annotations: List of annotations
+        :type annotations: [AnnotationResource]
+        :param type_uri: URI Type on which to filter
+        :type type_uri: str
+        :param number: Number of the annotation to return
+        :type number: int
+        :return: Annotation(s) matching the request
+        :rtype: [AnnotationResourcee] or AnnotationResource
+        """
         filtered = [
             annotation
             for annotation in annotations
