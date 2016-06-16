@@ -6,22 +6,33 @@ from pkg_resources import resource_filename
 class Arethusa(AnnotationsApiPlugin):
     """ Arethusa plugin for Nemo
 
-    .. note:: This class inherits some routes from the base `AnnotationsApiPluigin <http://flask-capitains-nemo.readthedocs.io/en/1.0.0b-dev/Nemo.api.html#flask.ext.nemo.plugins.annotations_api.AnnotationsApiPlugin>`_
+    .. note:: This class inherits some routes from the base `AnnotationsApiPlugin <http://flask-capitains-nemo.readthedocs.io/en/1.0.0b-dev/Nemo.api.html#flask.ext.nemo.plugins.annotations_api.AnnotationsApiPlugin>`_
 
     :param queryinterface: QueryInterface to use to retrieve annotations
-    :type queryinterface: flask_nemo.query.proto.
+    :type queryinterface: flask_nemo.query.proto.QueryPrototype
+
+    :ivar interface: QueryInterface used to retrieve annotations
+    :cvar HAS_AUGMENT_RENDER: (True) Adds a stack of render
+
+
+    The overall plugins contains three new routes (on top of AnnotationsAPIPlugin) :
+
+        - ``/arethusa.deps.json`` which feeds informations about Arethusa assets dependencies
+        - ``/arethusa-assets/<filename>`` which is a self implemented assets route.
+        - ``/arethusa.config.json`` which is the config for the widget
+
+    It contains two new templates :
+
+        - a ``arethusa::text.html`` template which overrides the original when there is treebank available
+        - a ``arethusa::widget.tree.json`` template which providees the configuration for the widget
+
+    It contains a render functions which will use the arethusa::text.html instead of main::text.html if there is a treebank found within the QueryInterface
+
     """
     HAS_AUGMENT_RENDER = True
-    CSS_FILENAMES = ["arethusa.min.css", "foundation-icon.css", "font-awesome.min.css", "colorpicker.css"]
-    JS_FILENAMES = ["arethusa.widget.loader.js", "arethusa.min.js", "arethusa.packages.min.js"]
-    CSS = ["http://127.0.0.1:5000/arethusa-assets/css/arethusa.min.css"]
-    REQUIRED_ASSETS = ["arethusa.widget.loader.js"]
     TEMPLATES = {
         "arethusa": resource_filename("nemo_arethusa_plugin", "data/templates")
     }
-    FILTERS = [
-        "f_annotation_filter"
-    ]
 
     ROUTES = AnnotationsApiPlugin.ROUTES + [
         ("/arethusa.deps.json", "r_arethusa_dependencies", ["GET"]),
@@ -38,6 +49,13 @@ class Arethusa(AnnotationsApiPlugin):
         return self.__interface__
 
     def render(self, **kwargs):
+        """ Render function stack.
+
+        If the template called is the main::text.html, it checks annotations from its query interface and replace it by arethusa::text.html if there is a treebank annotation
+
+        :param kwargs: Dictionary of named arguments
+        :return: Dictionary of named arguments
+        """
         update = kwargs
         if "template" in kwargs and kwargs["template"] == "main::text.html":
             total, update["annotations"] = self.interface.getAnnotations(kwargs["urn"])
@@ -50,17 +68,17 @@ class Arethusa(AnnotationsApiPlugin):
         return update
 
     def r_arethusa_assets(self, filename):
-        """
+        """ Routes for assets
 
-        :param filename:
-        :return:
+        :param filename: Filename in data/assets to retrievee
+        :return: Content of the file
         """
         return send_from_directory(resource_filename("nemo_arethusa_plugin", "data/assets"), filename)
 
     def r_arethusa_dependencies(self):
-        """ Return the json config of dependencies
+        """ Return the json config of dependencies asked by arethusa
 
-        :return:
+        :return: Json with dependencies
         """
         return jsonify({
             "css": {
@@ -76,30 +94,10 @@ class Arethusa(AnnotationsApiPlugin):
         })
 
     def r_arethusa_config(self):
+        """ Config JSON route for Arethusa : defines the layout and other resources
+
+        :return: {"template"}
+        """
         return {
             "template": "arethusa::widget.tree.json"
         }
-
-    @staticmethod
-    def f_annotation_filter(annotations, type_uri, number):
-        """ Annotation filtering filter
-
-        :param annotations: List of annotations
-        :type annotations: [AnnotationResource]
-        :param type_uri: URI Type on which to filter
-        :type type_uri: str
-        :param number: Number of the annotation to return
-        :type number: int
-        :return: Annotation(s) matching the request
-        :rtype: [AnnotationResourcee] or AnnotationResource
-        """
-        filtered = [
-            annotation
-            for annotation in annotations
-            if annotation.type_uri == type_uri
-        ]
-        number = min([len(filtered), number])
-        if number == 0:
-            return None
-        else:
-            return filtered[number-1]
