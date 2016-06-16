@@ -1,7 +1,7 @@
 Arethusa for CapiTainS Nemo
 ===========================
 
-.. image:: http://nemo-arethusa-plugin.readthedocs.io/badge/?version=latest
+.. image:: https://readthedocs.org/projects/nemo-arethusa-plugin/badge/?version=latest
     :alt: Documentation
     :target: http://nemo-arethusa-plugin.readthedocs.io/
 
