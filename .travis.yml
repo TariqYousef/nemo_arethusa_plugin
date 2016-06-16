@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.4"
+# command to install dependencies
+install:
+    - python setup.py develop
+    - pip install coveralls
+# command to run tests
+script:
+    - coverage run --source=nemo_arethusa_plugin setup.py test
+after_success:
+    - coveralls

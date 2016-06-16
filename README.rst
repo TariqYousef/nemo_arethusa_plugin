@@ -5,13 +5,13 @@ Arethusa for CapiTainS Nemo
     :alt: Documentation
     :target: http://nemo-arethusa-plugin.readthedocs.io/
 
-.. image:: https://travis-ci.org/alpheios/nemo-arethusa-plugin.svg
+.. image:: https://travis-ci.org/alpheios-project/nemo_arethusa_plugin.svg
     :alt: Build status
-    :target: https://travis-ci.org/alpheios/nemo-arethusa-plugin
+    :target: https://travis-ci.org/alpheios-project/nemo_arethusa_plugin
 
-.. image:: https://coveralls.io/repos/alpheios/nemo-arethusa-plugin/badge.svg?branch=master&service=github
+.. image:: https://coveralls.io/repos/alpheios-project/nemo_arethusa_plugin/badge.svg?branch=master&service=github
     :alt: Coverage
-    :target: https://coveralls.io/github/alpheios/nemo-arethusa-plugin?branch=master
+    :target: https://coveralls.io/github/alpheios-project/nemo_arethusa_plugin?branch=master
 
 .. image:: https://badge.fury.io/py/nemo_arethusa_plugin.svg
     :target: https://badge.fury.io/py/nemo_arethusa_plugin

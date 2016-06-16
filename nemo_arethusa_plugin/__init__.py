@@ -17,14 +17,14 @@ class Arethusa(AnnotationsApiPlugin):
 
     The overall plugins contains three new routes (on top of AnnotationsAPIPlugin) :
 
-        - ``/arethusa.deps.json`` which feeds informations about Arethusa assets dependencies
-        - ``/arethusa-assets/<filename>`` which is a self implemented assets route.
-        - ``/arethusa.config.json`` which is the config for the widget
+        - :code:`/arethusa.deps.json` which feeds informations about Arethusa assets dependencies
+        - :code:`/arethusa-assets/<filename>` which is a self implemented assets route.
+        - :code:`/arethusa.config.json` which is the config for the widget
 
     It contains two new templates :
 
-        - a ``arethusa::text.html`` template which overrides the original when there is treebank available
-        - a ``arethusa::widget.tree.json`` template which providees the configuration for the widget
+        - a :code:`arethusa::text.html` template which overrides the original when there is treebank available
+        - a :code:`arethusa::widget.tree.json` template which providees the configuration for the widget
 
     It contains a render functions which will use the arethusa::text.html instead of main::text.html if there is a treebank found within the QueryInterface
 
