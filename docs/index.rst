@@ -8,7 +8,10 @@ Arethusa for Nemo Plugin
 
 .. include:: ../README.rst
 
+Index :
+
 .. toctree::
    :maxdepth: 2
 
    Arethusa.api
+   Arethusa.template
