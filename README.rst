@@ -9,8 +9,7 @@ Arethusa for CapiTainS Nemo
     :alt: Build status
     :target: https://travis-ci.org/alpheios-project/nemo_arethusa_plugin
 
-.. image:: https://coveralls.io/repos/alpheios-project/nemo_arethusa_plugin/badge.svg?branch=master&service=github
-    :alt: Coverage
+ .. image:: https://coveralls.io/repos/github/alpheios-project/nemo_arethusa_plugin/badge.svg?branch=master
     :target: https://coveralls.io/github/alpheios-project/nemo_arethusa_plugin?branch=master
 
 .. image:: https://badge.fury.io/py/nemo_arethusa_plugin.svg
