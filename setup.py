@@ -11,7 +11,7 @@ setup(
     description='Plugin for Capitains Nemo to load Arethusa on passage page',
     test_suite="tests",
     install_requires=[
-        "flask_nemo>=1.0.0b0"
+        "flask_nemo>=1.0.0b1"
     ],
     tests_require=[
         "capitains_nautilus>=0.0.5"
