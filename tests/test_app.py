@@ -84,6 +84,6 @@ class TestPlugin(TestCase):
         """ Ensure the config for Arethusa contains the right URI """
         data = json.loads(self.client.get("/arethusa.config.json").data.decode("utf-8"))
         self.assertEqual(
-            data["resources"]["arethusaServerTreebank"]["route"], "/api/annotations/:doc/body",
+            data["resources"]["nemoAnnotationsApi"]["route"], "/api/annotations/:doc/body",
             "Route to annotation API body should be available"
         )
