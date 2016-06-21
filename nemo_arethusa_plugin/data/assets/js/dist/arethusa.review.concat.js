@@ -292,6 +292,36 @@ angular.module('arethusa.review').run(['$templateCache', function($templateCache
   );
 
 
+  $templateCache.put('js/arethusa.review/templates/review.html',
+    "<div class=\"small-12 columns\" ng-if=\"!plugin.hideMode\">\n" +
+    "  <span>\n" +
+    "    <span class=\"settings-span-button right\" review-linker/>\n" +
+    "    <span>\n" +
+    "      <label class=\"margined-hor-tiny right\"> Auto-compare\n" +
+    "        <input type=\"checkbox\" ng-model=\"plugin.autoDiff\"/>\n" +
+    "      </label>\n" +
+    "    </span>\n" +
+    "  </span>\n" +
+    "</div>\n" +
+    "<div review-stats ng-if=\"plugin.diffActive\"/>\n" +
+    "<div delimiter/>\n" +
+    "<div class=\"small-12 columns\">\n" +
+    "  <div ng-class=\"{ 'tree-canvas': !plugin.hideMode }\">\n" +
+    "    <div class=\"tree-settings\">\n" +
+    "      <span class=\"button radius tiny right\" ng-click=\"plugin.compare()\">Compare</span>\n" +
+    "    <div>\n" +
+    "    <div\n" +
+    "      ng-if=\"!plugin.hideMode\"\n" +
+    "      dependency-tree\n" +
+    "      tokens=\"plugin.goldTokens\"\n" +
+    "      to-bottom\n" +
+    "      class=\"full-width\">\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "</div>\n"
+  );
+
+
   $templateCache.put('js/arethusa.review/templates/review_diff_report.html',
     "<div class=\"columns\" ng-repeat=\"(id, diff) in rev.diff\">\n" +
     "  <div\n" +
@@ -385,36 +415,6 @@ angular.module('arethusa.review').run(['$templateCache', function($templateCache
     "<div ng-if=\"openStats\" class=\"small-12 columns fade slide-right\">\n" +
     "  <div delimiter/>\n" +
     "  <div review-diff-report/>\n" +
-    "</div>\n"
-  );
-
-
-  $templateCache.put('js/arethusa.review/templates/review.html',
-    "<div class=\"small-12 columns\" ng-if=\"!plugin.hideMode\">\n" +
-    "  <span>\n" +
-    "    <span class=\"settings-span-button right\" review-linker/>\n" +
-    "    <span>\n" +
-    "      <label class=\"margined-hor-tiny right\"> Auto-compare\n" +
-    "        <input type=\"checkbox\" ng-model=\"plugin.autoDiff\"/>\n" +
-    "      </label>\n" +
-    "    </span>\n" +
-    "  </span>\n" +
-    "</div>\n" +
-    "<div review-stats ng-if=\"plugin.diffActive\"/>\n" +
-    "<div delimiter/>\n" +
-    "<div class=\"small-12 columns\">\n" +
-    "  <div ng-class=\"{ 'tree-canvas': !plugin.hideMode }\">\n" +
-    "    <div class=\"tree-settings\">\n" +
-    "      <span class=\"button radius tiny right\" ng-click=\"plugin.compare()\">Compare</span>\n" +
-    "    <div>\n" +
-    "    <div\n" +
-    "      ng-if=\"!plugin.hideMode\"\n" +
-    "      dependency-tree\n" +
-    "      tokens=\"plugin.goldTokens\"\n" +
-    "      to-bottom\n" +
-    "      class=\"full-width\">\n" +
-    "    </div>\n" +
-    "  </div>\n" +
     "</div>\n"
   );
 

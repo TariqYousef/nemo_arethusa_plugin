@@ -99,5 +99,5 @@ class Arethusa(AnnotationsApiPlugin):
         :return: {"template"}
         """
         return {
-            "template": "arethusa::widget.tree.json"
+            "template": "arethusa::nemo_arethusa_plugin.json"
         }

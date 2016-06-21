@@ -341,6 +341,54 @@ angular.module('arethusa.artificialToken').service('artificialToken', [
 angular.module('arethusa.artificialToken').run(['$templateCache', function($templateCache) {
   'use strict';
 
+  $templateCache.put('js/arethusa.artificial_token/templates/artificial_token.html',
+    "<div class=\"small-12 columns text-center\">\n" +
+    "  <span\n" +
+    "    class=\"button tiny radius\"\n" +
+    "    ng-click=\"plugin.toggleMode('create')\">\n" +
+    "    <span translate=\"create\"/>\n" +
+    "  </span>\n" +
+    "  <span\n" +
+    "    class=\"button tiny radius\"\n" +
+    "    ng-click=\"plugin.toggleMode('list')\">\n" +
+    "    <span translate=\"list\"/>\n" +
+    "  </span>\n" +
+    "  <div delimiter/>\n" +
+    "  <div ng-if=\"plugin.mode === 'create'\">\n" +
+    "    <form name=\"cAT\">\n" +
+    "      <label>\n" +
+    "        <span translate=\"aT.visualRepresentation\"/>\n" +
+    "        <input\n" +
+    "          type=\"text\"\n" +
+    "          foreign-keys\n" +
+    "          ng-model=\"plugin.model.string\"/>\n" +
+    "      </label>\n" +
+    "      <div class=\"text-left\">\n" +
+    "        <select\n" +
+    "          class=\"compact\"\n" +
+    "          required\n" +
+    "          ng-model=\"plugin.model.type\"\n" +
+    "          ng-options=\"type for type in plugin.supportedTypes\">\n" +
+    "        </select>\n" +
+    "      </div>\n" +
+    "      <span artificial-token-insertion-pointer/>\n" +
+    "      <div delimiter/>\n" +
+    "    </form>\n" +
+    "    <button\n" +
+    "      class=\"tiny radius\"\n" +
+    "      ng-disabled=\"!plugin.modelValid()\"\n" +
+    "      ng-click=\"plugin.propagateToState()\">\n" +
+    "      <span translate=\"aT.addToken\"/>\n" +
+    "    </button>\n" +
+    "  </div>\n" +
+    "  <div\n" +
+    "    ng-if=\"plugin.mode === 'list'\"\n" +
+    "    artificial-token-list>\n" +
+    "  </div>\n" +
+    "</div>\n"
+  );
+
+
   $templateCache.put('js/arethusa.artificial_token/templates/artificial_token_edit.html',
     "<input foreign-keys type=\"text\" ng-change=\"changeString()\" ng-model=\"string\"/>\n" +
     "<select\n" +
@@ -418,54 +466,6 @@ angular.module('arethusa.artificialToken').run(['$templateCache', function($temp
     "  </div>\n" +
     "\n" +
     "  <div artificial-token-edit=\"token\"/>\n" +
-    "</div>\n"
-  );
-
-
-  $templateCache.put('js/arethusa.artificial_token/templates/artificial_token.html',
-    "<div class=\"small-12 columns text-center\">\n" +
-    "  <span\n" +
-    "    class=\"button tiny radius\"\n" +
-    "    ng-click=\"plugin.toggleMode('create')\">\n" +
-    "    <span translate=\"create\"/>\n" +
-    "  </span>\n" +
-    "  <span\n" +
-    "    class=\"button tiny radius\"\n" +
-    "    ng-click=\"plugin.toggleMode('list')\">\n" +
-    "    <span translate=\"list\"/>\n" +
-    "  </span>\n" +
-    "  <div delimiter/>\n" +
-    "  <div ng-if=\"plugin.mode === 'create'\">\n" +
-    "    <form name=\"cAT\">\n" +
-    "      <label>\n" +
-    "        <span translate=\"aT.visualRepresentation\"/>\n" +
-    "        <input\n" +
-    "          type=\"text\"\n" +
-    "          foreign-keys\n" +
-    "          ng-model=\"plugin.model.string\"/>\n" +
-    "      </label>\n" +
-    "      <div class=\"text-left\">\n" +
-    "        <select\n" +
-    "          class=\"compact\"\n" +
-    "          required\n" +
-    "          ng-model=\"plugin.model.type\"\n" +
-    "          ng-options=\"type for type in plugin.supportedTypes\">\n" +
-    "        </select>\n" +
-    "      </div>\n" +
-    "      <span artificial-token-insertion-pointer/>\n" +
-    "      <div delimiter/>\n" +
-    "    </form>\n" +
-    "    <button\n" +
-    "      class=\"tiny radius\"\n" +
-    "      ng-disabled=\"!plugin.modelValid()\"\n" +
-    "      ng-click=\"plugin.propagateToState()\">\n" +
-    "      <span translate=\"aT.addToken\"/>\n" +
-    "    </button>\n" +
-    "  </div>\n" +
-    "  <div\n" +
-    "    ng-if=\"plugin.mode === 'list'\"\n" +
-    "    artificial-token-list>\n" +
-    "  </div>\n" +
     "</div>\n"
   );
 

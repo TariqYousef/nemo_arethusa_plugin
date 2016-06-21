@@ -1239,6 +1239,23 @@ angular.module('arethusa.comments', ['yaru22.md']);
 
 "use strict";
 
+angular.module('arethusa.comments').directive('comment', [
+  'comments',
+  function(comments) {
+    return {
+      restrict: 'A',
+      scope: {
+        comment: '='
+      },
+      link: function(scope, element, attrs) {
+      },
+      templateUrl: 'js/arethusa.comments/templates/comment.html'
+    };
+  }
+]);
+
+"use strict";
+
 angular.module('arethusa.comments').directive('commentCreator', [
   'comments',
   'state',
@@ -1384,23 +1401,6 @@ angular.module('arethusa.comments').directive('commentTargets', [
       },
       templateUrl: 'js/arethusa.comments/templates/comment_targets.html'
 
-    };
-  }
-]);
-
-"use strict";
-
-angular.module('arethusa.comments').directive('comment', [
-  'comments',
-  function(comments) {
-    return {
-      restrict: 'A',
-      scope: {
-        comment: '='
-      },
-      link: function(scope, element, attrs) {
-      },
-      templateUrl: 'js/arethusa.comments/templates/comment.html'
     };
   }
 ]);
@@ -1811,6 +1811,19 @@ angular.module('arethusa.comments').service('comments', [
 angular.module('arethusa.comments').run(['$templateCache', function($templateCache) {
   'use strict';
 
+  $templateCache.put('js/arethusa.comments/templates/comment.html',
+    "<div class=\"comment\">\n" +
+    "  <div class=\"comment-header\">\n" +
+    "    <span><strong>{{ comment.user }}</strong></span>\n" +
+    "    <span class=\"right note\">{{ comment.updated_at | date: 'short' }}</span>\n" +
+    "  </div>\n" +
+    "  <div class=\"comment-body\">\n" +
+    "    <md ng-model=\"comment.comment\"/>\n" +
+    "  </div>\n" +
+    "</div>\n"
+  );
+
+
   $templateCache.put('js/arethusa.comments/templates/comment_creator.html',
     "<div>\n" +
     "  <div delimiter/>\n" +
@@ -1902,35 +1915,6 @@ angular.module('arethusa.comments').run(['$templateCache', function($templateCac
   );
 
 
-  $templateCache.put('js/arethusa.comments/templates/comment.html',
-    "<div class=\"comment\">\n" +
-    "  <div class=\"comment-header\">\n" +
-    "    <span><strong>{{ comment.user }}</strong></span>\n" +
-    "    <span class=\"right note\">{{ comment.updated_at | date: 'short' }}</span>\n" +
-    "  </div>\n" +
-    "  <div class=\"comment-body\">\n" +
-    "    <md ng-model=\"comment.comment\"/>\n" +
-    "  </div>\n" +
-    "</div>\n"
-  );
-
-
-  $templateCache.put('js/arethusa.comments/templates/comments_on_doc_level.html',
-    "<div ng-if=\"count()\" class=\"comments\">\n" +
-    "  <div ng-click=\"visible = !visible\">\n" +
-    "    <span class=\"italic clickable\">\n" +
-    "      <span translate=\"comments.docLevelComm\"/>\n" +
-    "      <span>({{ count() }})</span>\n" +
-    "    </span>\n" +
-    "  </div>\n" +
-    "  <div delimiter/>\n" +
-    "  <div ng-if=\"visible\" class=\"fade fast\">\n" +
-    "    <div ng-repeat=\"comment in c.docLevelComments\" comment=\"comment\"/>\n" +
-    "  </div>\n" +
-    "</div>\n"
-  );
-
-
   $templateCache.put('js/arethusa.comments/templates/comments.directive.html',
     "<div class=\"comments\">\n" +
     "  <div class=\"italic\">\n" +
@@ -1969,6 +1953,22 @@ angular.module('arethusa.comments').run(['$templateCache', function($templateCac
     "</div>\n" +
     "<div delimiter/>\n" +
     "<div comments-on-doc-level/>\n"
+  );
+
+
+  $templateCache.put('js/arethusa.comments/templates/comments_on_doc_level.html',
+    "<div ng-if=\"count()\" class=\"comments\">\n" +
+    "  <div ng-click=\"visible = !visible\">\n" +
+    "    <span class=\"italic clickable\">\n" +
+    "      <span translate=\"comments.docLevelComm\"/>\n" +
+    "      <span>({{ count() }})</span>\n" +
+    "    </span>\n" +
+    "  </div>\n" +
+    "  <div delimiter/>\n" +
+    "  <div ng-if=\"visible\" class=\"fade fast\">\n" +
+    "    <div ng-repeat=\"comment in c.docLevelComments\" comment=\"comment\"/>\n" +
+    "  </div>\n" +
+    "</div>\n"
   );
 
 

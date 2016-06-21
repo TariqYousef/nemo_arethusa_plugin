@@ -137,16 +137,6 @@ angular.module('arethusa.exercise').service('instructor', [
 angular.module('arethusa.exercise').run(['$templateCache', function($templateCache) {
   'use strict';
 
-  $templateCache.put('js/arethusa.exercise/templates/fill_in_the_blank_form.html',
-    "<input\n" +
-    "  class=\"inline-form\"\n" +
-    "  ng-class=\"validatedClass()\"\n" +
-    "  type=\"text\"\n" +
-    "  ng-model=\"plugin.answers[id]\">\n" +
-    "</input>\n"
-  );
-
-
   $templateCache.put('js/arethusa.exercise/templates/fill_in_the_blank.html',
     "<div class=\"small-12 columns small-text-center\" ng-hide=\"plugin.started\">\n" +
     "  <em>Read the instructions and hit start when you're ready</em>\n" +
@@ -167,6 +157,16 @@ angular.module('arethusa.exercise').run(['$templateCache', function($templateCac
     "  </span>\n" +
     "  </p>\n" +
     "</div>\n"
+  );
+
+
+  $templateCache.put('js/arethusa.exercise/templates/fill_in_the_blank_form.html',
+    "<input\n" +
+    "  class=\"inline-form\"\n" +
+    "  ng-class=\"validatedClass()\"\n" +
+    "  type=\"text\"\n" +
+    "  ng-model=\"plugin.answers[id]\">\n" +
+    "</input>\n"
   );
 
 

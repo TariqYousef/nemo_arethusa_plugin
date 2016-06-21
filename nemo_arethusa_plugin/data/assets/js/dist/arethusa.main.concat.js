@@ -35,7 +35,7 @@ angular.module('arethusa').config([
 
     $translateProvider
       .useStaticFilesLoader({
-        prefix: 'http://localhost:8090/i18n/',
+        prefix: window.i18npath, 
         suffix: '.json'
       })
 
@@ -59,6 +59,7 @@ function Arethusa() {
     var template = document.createElement("div");
     template.setAttribute("ng-include",'gS.layout.template');
     template.setAttribute("class",'fade slow');
+    template.setAttribute("key-capture",'');
     document.getElementById(self.id.slice(1)).appendChild(template);
     var target = angular.element(self.id);
     target.attr('ng-controller','ArethusaCtrl');
@@ -969,6 +970,16 @@ angular.module('arethusa').service('retrieverHelper', [
   }
 ]);
 
+'use strict';
+
+angular.module('arethusa').constant('VERSION', {
+  revision: '1cd0320d21dec59dcbf67bd06d7bd5fab3aa7e8c',
+  branch: 'master',
+  version: '0.2.5',
+  date: '2016-06-08T09:41:19.787Z',
+  repository: 'http://github.com/latin-language-toolkit/arethusa'
+});
+
 angular.module('arethusa').run(['$templateCache', function($templateCache) {
   'use strict';
 
@@ -1303,46 +1314,6 @@ angular.module('arethusa').run(['$templateCache', function($templateCache) {
   );
 
 
-  $templateCache.put('js/templates/main_grid.html',
-    "<div>\n" +
-    "  <div id=\"arethusa-editor\">\n" +
-    "    <div class=\"canvas-border\"/>\n" +
-    "\n" +
-    "    <div arethusa-grid/>\n" +
-    "\n" +
-    "    <div arethusa-context-menus tokens=\"state.tokens\" plugins=\"plugins.withMenu\"/>\n" +
-    "  </div>\n" +
-    "  <div notifications/>\n" +
-    "  <div id=\"arethusa-sentence-list\" class=\"hide\"/>\n" +
-    "</div>\n"
-  );
-
-
-  $templateCache.put('js/templates/main_with_sidepanel.html',
-    "<div>\n" +
-    "  <div id=\"arethusa-editor\">\n" +
-    "    <div class=\"canvas-border\"/>\n" +
-    "\n" +
-    "    <div id=\"canvas\" class=\"row panel full-height\" full-height>\n" +
-    "      <div id=\"main-body\" to-bottom>\n" +
-    "        <div ng-repeat=\"pl in plugins.main\" plugin name=\"{{ pl.name }}\"/>\n" +
-    "        <div keys-to-screen/>\n" +
-    "      </div>\n" +
-    "\n" +
-    "      <div id=\"sidepanel\" sidepanel to-bottom class=\"scrollable\">\n" +
-    "        <div id=\"sidepanel-resizer\" resizable to-bottom></div>\n" +
-    "        <div id=\"sidepanel-body\" arethusa-tabs=\"plugins.sub\"/>\n" +
-    "      </div>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div arethusa-context-menus tokens=\"state.tokens\" plugins=\"plugins.withMenu\"/>\n" +
-    "  </div>\n" +
-    "  <div notifications/>\n" +
-    "  <div id=\"arethusa-sentence-list\" class=\"hide\"/>\n" +
-    "</div>\n"
-  );
-
-
   $templateCache.put('js/templates/main.html',
     "<div class=\"row panel\">\n" +
     "  <div class=\"columns small-12\">\n" +
@@ -1461,108 +1432,43 @@ angular.module('arethusa').run(['$templateCache', function($templateCache) {
   );
 
 
-  $templateCache.put('js/templates/morph_form_create.html',
-    "<div class=\"small-6 columns\">\n" +
-    "  <ul class=\"button-group right\">\n" +
-    "    <li>\n" +
-    "      <span\n" +
-    "        class=\"button micro radius\"\n" +
-    "        ng-click=\"reset()\"\n" +
-    "        translate=\"reset\">\n" +
-    "      </span>\n" +
-    "    </li>\n" +
-    "    <li>\n" +
-    "      <span\n" +
-    "        class=\"button micro radius\"\n" +
-    "        ng-click=\"save(mFCForm.$valid)\"\n" +
-    "        translate=\"save\">\n" +
-    "      </span>\n" +
-    "    </li>\n" +
-    "  </ul>\n" +
-    "</div>\n" +
+  $templateCache.put('js/templates/main_grid.html',
+    "<div>\n" +
+    "  <div id=\"arethusa-editor\">\n" +
+    "    <div class=\"canvas-border\"/>\n" +
     "\n" +
-    "<div delimiter></div>\n" +
+    "    <div arethusa-grid/>\n" +
     "\n" +
-    "<form name=\"mFCForm\">\n" +
-    "  <div class=\"small-12 columns\">\n" +
-    "    <alert\n" +
-    "      ng-if=\"alert\"\n" +
-    "      class=\"radius center fade-in error\"\n" +
-    "      close=\"resetAlert()\">\n" +
-    "      {{ translations.createError() }}\n" +
-    "    </alert>\n" +
+    "    <div arethusa-context-menus tokens=\"state.tokens\" plugins=\"plugins.withMenu\"/>\n" +
     "  </div>\n" +
-    "\n" +
-    "  <div class=\"small-12 columns\">\n" +
-    "    <div class=\"small-3 columns\">\n" +
-    "      <label class=\"right\">Lemma</label>\n" +
-    "    </div>\n" +
-    "    <div class=\"small-9 columns\">\n" +
-    "      <ng-form\n" +
-    "        id=\"lemma-form\"\n" +
-    "        tooltip-placement=\"top\"\n" +
-    "        tooltip=\"{{ lemmaHint }}\">\n" +
-    "        <input\n" +
-    "          foreign-keys\n" +
-    "          class=\"compact error\"\n" +
-    "          type=\"text\"\n" +
-    "          required\n" +
-    "          ng-change=\"declareOk()\"\n" +
-    "          ng-model=\"form.lemma\">\n" +
-    "        </input>\n" +
-    "      </ng-form>\n" +
-    "    </div>\n" +
-    "  </div>\n" +
-    "\n" +
-    "  <div\n" +
-    "    ng-repeat=\"attr in visibleAttributes\"\n" +
-    "    ng-init=\"options= m.attributeValues(attr)\">\n" +
-    "    <div class=\"small-12 columns\">\n" +
-    "      <div class=\"small-3 columns\">\n" +
-    "        <label class=\"right\">{{ m.longAttributeName(attr) }}</label>\n" +
-    "      </div>\n" +
-    "\n" +
-    "      <div class=\"small-9 columns\">\n" +
-    "        <select\n" +
-    "          class=\"compact\"\n" +
-    "          required\n" +
-    "          ng-model=\"form.attributes[attr]\"\n" +
-    "          ng-options=\"options[key].long for key in options | keys\"\n" +
-    "          ng-change=\"m.updatePostag(form, attr, form.attributes[attr])\">\n" +
-    "        </select>\n" +
-    "      </div>\n" +
-    "    </div>\n" +
-    "  </div>\n" +
-    "</form>\n"
+    "  <div notifications/>\n" +
+    "  <div id=\"arethusa-sentence-list\" class=\"hide\"/>\n" +
+    "</div>\n"
   );
 
 
-  $templateCache.put('js/templates/morph_form_edit.html',
-    "<div class=\"row\" ng-repeat=\"(attr, val) in form.attributes\">\n" +
-    "  <div class=\"small-3 columns\">\n" +
-    "    <label class=\"right\">{{ plugin.longAttributeName(attr) }}</label>\n" +
-    "  </div>\n" +
+  $templateCache.put('js/templates/main_with_sidepanel.html',
+    "<div>\n" +
+    "  <div id=\"arethusa-editor\">\n" +
+    "    <div class=\"canvas-border\"/>\n" +
     "\n" +
-    "  <div class=\"small-9 columns\">\n" +
-    "    <select\n" +
-    "      ng-model=\"form.attributes[attr]\"\n" +
-    "      ng-init=\"opt.short\"\n" +
-    "      ng-options=\"name as opt.long for (name, opt) in plugin.attributeValues(attr)\"\n" +
-    "      fire-event=\"{target: 'form', property: 'attr', value: 'val'}\"\n" +
-    "      synchronize-postag=\"{form: 'form', attr: 'attr', val: 'val'}\">\n" +
-    "    </select>\n" +
+    "    <div id=\"canvas\" class=\"row panel full-height\" full-height>\n" +
+    "      <div id=\"main-body\" to-bottom>\n" +
+    "        <div ng-repeat=\"pl in plugins.main\" plugin name=\"{{ pl.name }}\"/>\n" +
+    "        <div keys-to-screen/>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div id=\"sidepanel\" sidepanel to-bottom class=\"scrollable\">\n" +
+    "        <div id=\"sidepanel-resizer\" resizable to-bottom></div>\n" +
+    "        <div id=\"sidepanel-body\" arethusa-tabs=\"plugins.sub\"/>\n" +
+    "      </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div arethusa-context-menus tokens=\"state.tokens\" plugins=\"plugins.withMenu\"/>\n" +
     "  </div>\n" +
-    "</div>\n" +
-    "<small ng-show=\"form.lexInvUri\">Lexical Inventory: {{ form.lexInvUri }}</small>\n"
-  );
-
-
-  $templateCache.put('js/templates/morph_form.html',
-    "<ul>\n" +
-    "  <li ng-repeat=\"(attr, val) in form.attributes\">\n" +
-    "    {{ plugin.longAttributeName(attr) }}: {{ plugin.abbrevAttributeValue(attr, val) }}\n" +
-    "  </li>\n" +
-    "</ul>\n"
+    "  <div notifications/>\n" +
+    "  <div id=\"arethusa-sentence-list\" class=\"hide\"/>\n" +
+    "</div>\n"
   );
 
 
@@ -1683,21 +1589,108 @@ angular.module('arethusa').run(['$templateCache', function($templateCache) {
   );
 
 
-  $templateCache.put('js/templates/navbar_landing.html',
-    "<div class=\"fixed\">\n" +
-    "  <nav class=\"top-bar\" data-topbar>\n" +
-    "    <ul class=\"title-area\">\n" +
-    "      <li class=\"name\">\n" +
-    "      <h1><a href=\"#\"><img ng-src=\"{{ logo }}\"/></a></h1>\n" +
-    "      </li>\n" +
-    "    </ul>\n" +
-    "    <section class=\"top-bar-section\">\n" +
-    "      <ul class=\" has-form right\">\n" +
-    "        <li><a class=\"button\" translate-language/></li>\n" +
-    "      </ul>\n" +
-    "    </section>\n" +
-    "  </nav>\n" +
-    "</div>\n"
+  $templateCache.put('js/templates/morph_form.html',
+    "<ul>\n" +
+    "  <li ng-repeat=\"(attr, val) in form.attributes\">\n" +
+    "    {{ plugin.longAttributeName(attr) }}: {{ plugin.abbrevAttributeValue(attr, val) }}\n" +
+    "  </li>\n" +
+    "</ul>\n"
+  );
+
+
+  $templateCache.put('js/templates/morph_form_create.html',
+    "<div class=\"small-6 columns\">\n" +
+    "  <ul class=\"button-group right\">\n" +
+    "    <li>\n" +
+    "      <span\n" +
+    "        class=\"button micro radius\"\n" +
+    "        ng-click=\"reset()\"\n" +
+    "        translate=\"reset\">\n" +
+    "      </span>\n" +
+    "    </li>\n" +
+    "    <li>\n" +
+    "      <span\n" +
+    "        class=\"button micro radius\"\n" +
+    "        ng-click=\"save(mFCForm.$valid)\"\n" +
+    "        translate=\"save\">\n" +
+    "      </span>\n" +
+    "    </li>\n" +
+    "  </ul>\n" +
+    "</div>\n" +
+    "\n" +
+    "<div delimiter></div>\n" +
+    "\n" +
+    "<form name=\"mFCForm\">\n" +
+    "  <div class=\"small-12 columns\">\n" +
+    "    <alert\n" +
+    "      ng-if=\"alert\"\n" +
+    "      class=\"radius center fade-in error\"\n" +
+    "      close=\"resetAlert()\">\n" +
+    "      {{ translations.createError() }}\n" +
+    "    </alert>\n" +
+    "  </div>\n" +
+    "\n" +
+    "  <div class=\"small-12 columns\">\n" +
+    "    <div class=\"small-3 columns\">\n" +
+    "      <label class=\"right\">Lemma</label>\n" +
+    "    </div>\n" +
+    "    <div class=\"small-9 columns\">\n" +
+    "      <ng-form\n" +
+    "        id=\"lemma-form\"\n" +
+    "        tooltip-placement=\"top\"\n" +
+    "        tooltip=\"{{ lemmaHint }}\">\n" +
+    "        <input\n" +
+    "          foreign-keys\n" +
+    "          class=\"compact error\"\n" +
+    "          type=\"text\"\n" +
+    "          required\n" +
+    "          ng-change=\"declareOk()\"\n" +
+    "          ng-model=\"form.lemma\">\n" +
+    "        </input>\n" +
+    "      </ng-form>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "\n" +
+    "  <div\n" +
+    "    ng-repeat=\"attr in visibleAttributes\"\n" +
+    "    ng-init=\"options= m.attributeValues(attr)\">\n" +
+    "    <div class=\"small-12 columns\">\n" +
+    "      <div class=\"small-3 columns\">\n" +
+    "        <label class=\"right\">{{ m.longAttributeName(attr) }}</label>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"small-9 columns\">\n" +
+    "        <select\n" +
+    "          class=\"compact\"\n" +
+    "          required\n" +
+    "          ng-model=\"form.attributes[attr]\"\n" +
+    "          ng-options=\"options[key].long for key in options | keys\"\n" +
+    "          ng-change=\"m.updatePostag(form, attr, form.attributes[attr])\">\n" +
+    "        </select>\n" +
+    "      </div>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "</form>\n"
+  );
+
+
+  $templateCache.put('js/templates/morph_form_edit.html',
+    "<div class=\"row\" ng-repeat=\"(attr, val) in form.attributes\">\n" +
+    "  <div class=\"small-3 columns\">\n" +
+    "    <label class=\"right\">{{ plugin.longAttributeName(attr) }}</label>\n" +
+    "  </div>\n" +
+    "\n" +
+    "  <div class=\"small-9 columns\">\n" +
+    "    <select\n" +
+    "      ng-model=\"form.attributes[attr]\"\n" +
+    "      ng-init=\"opt.short\"\n" +
+    "      ng-options=\"name as opt.long for (name, opt) in plugin.attributeValues(attr)\"\n" +
+    "      fire-event=\"{target: 'form', property: 'attr', value: 'val'}\"\n" +
+    "      synchronize-postag=\"{form: 'form', attr: 'attr', val: 'val'}\">\n" +
+    "    </select>\n" +
+    "  </div>\n" +
+    "</div>\n" +
+    "<small ng-show=\"form.lexInvUri\">Lexical Inventory: {{ form.lexInvUri }}</small>\n"
   );
 
 
@@ -1718,6 +1711,24 @@ angular.module('arethusa').run(['$templateCache', function($templateCache) {
     "</div>\n" +
     "<div help-panel class=\"hide row panel\"/>\n" +
     "<div global-settings-panel class=\"hide row panel\"/>\n"
+  );
+
+
+  $templateCache.put('js/templates/navbar_landing.html',
+    "<div class=\"fixed\">\n" +
+    "  <nav class=\"top-bar\" data-topbar>\n" +
+    "    <ul class=\"title-area\">\n" +
+    "      <li class=\"name\">\n" +
+    "      <h1><a href=\"#\"><img ng-src=\"{{ logo }}\"/></a></h1>\n" +
+    "      </li>\n" +
+    "    </ul>\n" +
+    "    <section class=\"top-bar-section\">\n" +
+    "      <ul class=\" has-form right\">\n" +
+    "        <li><a class=\"button\" translate-language/></li>\n" +
+    "      </ul>\n" +
+    "    </section>\n" +
+    "  </nav>\n" +
+    "</div>\n"
   );
 
 
@@ -1809,30 +1820,6 @@ angular.module('arethusa').run(['$templateCache', function($templateCache) {
   );
 
 
-  $templateCache.put('js/templates/text_with_context.html',
-    "<p lang-specific>\n" +
-    "  <span\n" +
-    "    ng-if=\"plugin.showContext\"\n" +
-    "    text-context=\"plugin.context.pre\">\n" +
-    "  </span>\n" +
-    "  <span ng-repeat=\"token in plugin.tokens\">\n" +
-    "    <span\n" +
-    "      token=\"token\"\n" +
-    "      colorize=\"true\"\n" +
-    "      click=\"true\"\n" +
-    "      hover=\"true\"\n" +
-    "      highlight=\"true\">\n" +
-    "    </span>\n" +
-    "  </span>\n" +
-    "  <span\n" +
-    "    ng-if=\"plugin.showContext\"\n" +
-    "    text-context=\"plugin.context.post\">\n" +
-    "  </span>\n" +
-    "</p>\n" +
-    "\n"
-  );
-
-
   $templateCache.put('js/templates/text.html',
     "<h3>Text plugin</h3>\n" +
     "<table>\n" +
@@ -1870,6 +1857,30 @@ angular.module('arethusa').run(['$templateCache', function($templateCache) {
     "    <!--<br ng-if=\"token.terminator && !$last\"/>-->\n" +
     "  </span>\n" +
     "</p>\n"
+  );
+
+
+  $templateCache.put('js/templates/text_with_context.html',
+    "<p lang-specific>\n" +
+    "  <span\n" +
+    "    ng-if=\"plugin.showContext\"\n" +
+    "    text-context=\"plugin.context.pre\">\n" +
+    "  </span>\n" +
+    "  <span ng-repeat=\"token in plugin.tokens\">\n" +
+    "    <span\n" +
+    "      token=\"token\"\n" +
+    "      colorize=\"true\"\n" +
+    "      click=\"true\"\n" +
+    "      hover=\"true\"\n" +
+    "      highlight=\"true\">\n" +
+    "    </span>\n" +
+    "  </span>\n" +
+    "  <span\n" +
+    "    ng-if=\"plugin.showContext\"\n" +
+    "    text-context=\"plugin.context.post\">\n" +
+    "  </span>\n" +
+    "</p>\n" +
+    "\n"
   );
 
 

@@ -321,6 +321,44 @@ angular.module('arethusa.core').controller('SearchCtrl', [
 
 "use strict";
 
+angular.module('arethusa.core').directive('arethusaGrid', [
+  'arethusaGrid',
+  'plugins',
+  'globalSettings',
+  '$timeout',
+  function(arethusaGrid, plugins, globalSettings, $timeout) {
+    return {
+      restrict: 'A',
+      scope: true, // inherit from ArethusaCtrl's scope
+      link: function(scope, element, attrs) {
+        angular.element(document.body).css('overflow', 'auto');
+
+        scope.grid = arethusaGrid;
+
+        function addSettings() {
+          globalSettings.defineSetting('grid', 'custom', 'grid-setting');
+          globalSettings.defineSetting('gridItems', 'custom', 'grid-items');
+        }
+
+        function removeSettings() {
+          globalSettings.removeSetting('grid');
+          globalSettings.removeSetting('gridItems');
+        }
+
+        // We need to timeout this, so that we can give globalSettings
+        // time to define its own default settings - only afterwards
+        // we add our own grid settings
+        $timeout(addSettings);
+
+        scope.$on('$destroy', removeSettings);
+      },
+      templateUrl: 'js/arethusa.core/templates/arethusa_grid.html'
+    };
+  }
+]);
+
+"use strict";
+
 angular.module('arethusa.core').directive('arethusaGridHandle', [
   '$timeout',
   'plugins',
@@ -358,44 +396,6 @@ angular.module('arethusa.core').directive('arethusaGridHandle', [
         });
       },
       templateUrl: 'js/arethusa.core/templates/arethusa_grid_handle.html'
-    };
-  }
-]);
-
-"use strict";
-
-angular.module('arethusa.core').directive('arethusaGrid', [
-  'arethusaGrid',
-  'plugins',
-  'globalSettings',
-  '$timeout',
-  function(arethusaGrid, plugins, globalSettings, $timeout) {
-    return {
-      restrict: 'A',
-      scope: true, // inherit from ArethusaCtrl's scope
-      link: function(scope, element, attrs) {
-        angular.element(document.body).css('overflow', 'auto');
-
-        scope.grid = arethusaGrid;
-
-        function addSettings() {
-          globalSettings.defineSetting('grid', 'custom', 'grid-setting');
-          globalSettings.defineSetting('gridItems', 'custom', 'grid-items');
-        }
-
-        function removeSettings() {
-          globalSettings.removeSetting('grid');
-          globalSettings.removeSetting('gridItems');
-        }
-
-        // We need to timeout this, so that we can give globalSettings
-        // time to define its own default settings - only afterwards
-        // we add our own grid settings
-        $timeout(addSettings);
-
-        scope.$on('$destroy', removeSettings);
-      },
-      templateUrl: 'js/arethusa.core/templates/arethusa_grid.html'
     };
   }
 ]);
@@ -990,105 +990,6 @@ angular.module('arethusa.core').directive('focusMe', [
 ]);
 
 'use strict';
-
-// TODO
-//
-// Extract a foreignKeys service which handles common operations
-
-angular.module('arethusa.core').directive('foreignKeysHelp', [
-  'keyCapture',
-  'languageSettings',
-  '$timeout',
-  function(keyCapture, languageSettings, $timeout) {
-    return {
-      restrict: 'AE',
-      scope: true,
-      link: function(scope, element, attr) {
-        var shiftersBound = false;
-
-        // Will be added lazily through a watch
-        var shifters;
-
-        function generateKeys() {
-          var lang = (languageSettings.getFor('treebank') || languageSettings.getFor('hebrewMorph') || {}).lang;
-          scope.keys = keyCapture.mappedKeyboard(lang, scope.shifted);
-        }
-
-        function bindShift() {
-          scope.$apply(function() {
-            scope.shifted = !scope.shifted;
-            generateKeys();
-          });
-        }
-
-        var shifterWatch = scope.$watch('visible', function(newVal, oldVal) {
-          if (newVal && !shiftersBound) {
-            shifters = element.find('.shifter');
-            shifters.bind('click', bindShift);
-            shifterWatch();
-          }
-        });
-
-        scope.$watch('shifted', function(newVal, oldVal) {
-          if (shifters) {
-            if (newVal) {
-              shifters.addClass('key-hit');
-            } else {
-              shifters.removeClass('key-hit');
-            }
-          }
-        });
-
-        scope.$on('convertingKey', function(event, keyCode) {
-          if (scope.visible) {
-            // Not using jQuery selectors here, as we have to deal with
-            // colons and the like!
-            var el = document.getElementById(keyCapture.codeToKey(keyCode));
-            var key = angular.element(el);
-            key.addClass('key-hit');
-            $timeout(function() {
-              key.removeClass('key-hit');
-            }, 450);
-          }
-        });
-
-        function FakeEvent(keyCode) {
-          this.keyCode  = keyCode;
-          this.shiftKey = scope.shifted;
-        }
-
-        function doShift(event, bool) {
-          if (keyCapture.codeToKey(event.keyCode) === 'shift') {
-            scope.$apply(function() {
-              scope.shifted = bool;
-              generateKeys();
-            });
-          }
-        }
-
-        scope.element.on('keydown', function(event) {
-          doShift(event, true);
-        });
-
-        scope.element.on('keyup', function(event) {
-          doShift(event, false);
-        });
-
-        scope.generate = function(key) {
-          var keyCode = keyCapture.keyToCode(key);
-          scope.parseEvent(new FakeEvent(keyCode), true);
-          scope.shifted = false;
-          generateKeys();
-        };
-
-        generateKeys();
-      },
-      templateUrl: './js/arethusa.core/templates/foreign_keys_help.html'
-    };
-  }
-]);
-
-'use strict';
 angular.module('arethusa.core').directive('foreignKeys',[
   'keyCapture',
   'languageSettings',
@@ -1213,6 +1114,105 @@ angular.module('arethusa.core').directive('foreignKeys',[
           element.attr('placeholder', placeHolderText);
         });
       }
+    };
+  }
+]);
+
+'use strict';
+
+// TODO
+//
+// Extract a foreignKeys service which handles common operations
+
+angular.module('arethusa.core').directive('foreignKeysHelp', [
+  'keyCapture',
+  'languageSettings',
+  '$timeout',
+  function(keyCapture, languageSettings, $timeout) {
+    return {
+      restrict: 'AE',
+      scope: true,
+      link: function(scope, element, attr) {
+        var shiftersBound = false;
+
+        // Will be added lazily through a watch
+        var shifters;
+
+        function generateKeys() {
+          var lang = (languageSettings.getFor('treebank') || languageSettings.getFor('hebrewMorph') || {}).lang;
+          scope.keys = keyCapture.mappedKeyboard(lang, scope.shifted);
+        }
+
+        function bindShift() {
+          scope.$apply(function() {
+            scope.shifted = !scope.shifted;
+            generateKeys();
+          });
+        }
+
+        var shifterWatch = scope.$watch('visible', function(newVal, oldVal) {
+          if (newVal && !shiftersBound) {
+            shifters = element.find('.shifter');
+            shifters.bind('click', bindShift);
+            shifterWatch();
+          }
+        });
+
+        scope.$watch('shifted', function(newVal, oldVal) {
+          if (shifters) {
+            if (newVal) {
+              shifters.addClass('key-hit');
+            } else {
+              shifters.removeClass('key-hit');
+            }
+          }
+        });
+
+        scope.$on('convertingKey', function(event, keyCode) {
+          if (scope.visible) {
+            // Not using jQuery selectors here, as we have to deal with
+            // colons and the like!
+            var el = document.getElementById(keyCapture.codeToKey(keyCode));
+            var key = angular.element(el);
+            key.addClass('key-hit');
+            $timeout(function() {
+              key.removeClass('key-hit');
+            }, 450);
+          }
+        });
+
+        function FakeEvent(keyCode) {
+          this.keyCode  = keyCode;
+          this.shiftKey = scope.shifted;
+        }
+
+        function doShift(event, bool) {
+          if (keyCapture.codeToKey(event.keyCode) === 'shift') {
+            scope.$apply(function() {
+              scope.shifted = bool;
+              generateKeys();
+            });
+          }
+        }
+
+        scope.element.on('keydown', function(event) {
+          doShift(event, true);
+        });
+
+        scope.element.on('keyup', function(event) {
+          doShift(event, false);
+        });
+
+        scope.generate = function(key) {
+          var keyCode = keyCapture.keyToCode(key);
+          scope.parseEvent(new FakeEvent(keyCode), true);
+          scope.shifted = false;
+          generateKeys();
+        };
+
+        generateKeys();
+      },
+      templateUrl: './js/arethusa.core/templates/foreign_keys_help.html'
     };
   }
 ]);
@@ -1366,50 +1366,6 @@ angular.module('arethusa.core').directive('gridSetting', [
 
 "use strict";
 
-angular.module('arethusa.core').directive('helpPanelHeading', [
-  function() {
-    return {
-      restrict: 'A',
-      scope: {
-        toggler: '@',
-        heading: '@'
-      },
-      link: function(scope, element, attrs) {
-        scope.toggle = function() {
-          scope.$parent.toggle(scope.toggler);
-        };
-      },
-      template: '\
-        <p\
-          class="text underline clickable"\
-          translate="{{ heading }}"\
-          ng-click="toggle()">\
-        </p>\
-      '
-    };
-  }
-]);
-
-"use strict";
-
-angular.module('arethusa.core').directive('helpPanelItem', [
-  function() {
-    return {
-      restrict: 'A',
-      scope: true,
-      transclude: true,
-      link: function(scope, element, attrs) {
-        scope.toggler = attrs.toggler;
-        scope.heading = attrs.heading;
-        scope.height  = attrs.height;
-      },
-      templateUrl: 'js/arethusa.core/templates/help_panel_item.html'
-    };
-  }
-]);
-
-"use strict";
-
 angular.module('arethusa.core').directive('helpPanel', [
   'help',
   'keyCapture',
@@ -1462,6 +1418,50 @@ angular.module('arethusa.core').directive('helpPanel', [
 
 "use strict";
 
+angular.module('arethusa.core').directive('helpPanelHeading', [
+  function() {
+    return {
+      restrict: 'A',
+      scope: {
+        toggler: '@',
+        heading: '@'
+      },
+      link: function(scope, element, attrs) {
+        scope.toggle = function() {
+          scope.$parent.toggle(scope.toggler);
+        };
+      },
+      template: '\
+        <p\
+          class="text underline clickable"\
+          translate="{{ heading }}"\
+          ng-click="toggle()">\
+        </p>\
+      '
+    };
+  }
+]);
+
+"use strict";
+
+angular.module('arethusa.core').directive('helpPanelItem', [
+  function() {
+    return {
+      restrict: 'A',
+      scope: true,
+      transclude: true,
+      link: function(scope, element, attrs) {
+        scope.toggler = attrs.toggler;
+        scope.heading = attrs.heading;
+        scope.height  = attrs.height;
+      },
+      templateUrl: 'js/arethusa.core/templates/help_panel_item.html'
+    };
+  }
+]);
+
+"use strict";
+
 angular.module('arethusa.core').directive('helpTrigger', [
   'generator',
   'help',
@@ -1501,6 +1501,10 @@ angular.module('arethusa.core').directive('keyCapture', [
     return {
       restrict: 'A',
       link: function (scope, element, attrs) {
+        // hack for widget mode, see issue #121
+        if (! element.is("body")) {
+          element = angular.element(document).find('body');
+        }
         element.on('keydown', function (event) {
           keyCapture.keydown(event);
         });
@@ -1780,54 +1784,6 @@ angular.module('arethusa.core').directive('outputterItem', [
 ]);
 
 'use strict';
-angular.module('arethusa.core').directive('pluginSetting', [
-  'userPreferences',
-  function (userPreferences) {
-    return {
-      restrict: 'A',
-      scope: true,
-      link: function(scope, element, attrs) {
-        scope.change = function() {
-          var model = scope.setting.model;
-          var value = scope.plugin[model];
-          var change = scope.setting.change;
-          userPreferences.set(scope.plugin.name, model, value);
-          if (angular.isFunction(change)) change();
-        };
-      },
-      templateUrl: 'js/arethusa.core/templates/plugin_setting.html'
-    };
-  }
-]);
-
-
-'use strict';
-
-/**
- * @ngdoc directive
- * @name arethusa.core.directive:pluginSettings
- * @restrict A
- *
- * @description
- * Iterates over a plugin's `settings` array of {@link arethusa.util.commons#methods_setting settings}.
- *
- * Either renders the default {@link arethusa.core.directive:pluginSetting pluginSetting}
- * directive or a custom directive. (cf. {@link arethusa.util.commons#methods_setting commons.setting}).
- *
- * Awaits the `plugin` scope variable to be present.
- *
- */
-
-angular.module('arethusa.core').directive('pluginSettings', [
-  function () {
-    return {
-      restrict: 'A',
-      templateUrl: 'js/arethusa.core/templates/plugin_settings.html'
-    };
-  }
-]);
-
-'use strict';
 
 /**
  * @ngdoc directive
@@ -1873,6 +1829,54 @@ angular.module('arethusa.core').directive('plugin', [
         });
       },
       templateUrl: 'js/arethusa.core/templates/plugin.html'
+    };
+  }
+]);
+
+'use strict';
+angular.module('arethusa.core').directive('pluginSetting', [
+  'userPreferences',
+  function (userPreferences) {
+    return {
+      restrict: 'A',
+      scope: true,
+      link: function(scope, element, attrs) {
+        scope.change = function() {
+          var model = scope.setting.model;
+          var value = scope.plugin[model];
+          var change = scope.setting.change;
+          userPreferences.set(scope.plugin.name, model, value);
+          if (angular.isFunction(change)) change();
+        };
+      },
+      templateUrl: 'js/arethusa.core/templates/plugin_setting.html'
+    };
+  }
+]);
+
+
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name arethusa.core.directive:pluginSettings
+ * @restrict A
+ *
+ * @description
+ * Iterates over a plugin's `settings` array of {@link arethusa.util.commons#methods_setting settings}.
+ *
+ * Either renders the default {@link arethusa.core.directive:pluginSetting pluginSetting}
+ * directive or a custom directive. (cf. {@link arethusa.util.commons#methods_setting commons.setting}).
+ *
+ * Awaits the `plugin` scope variable to be present.
+ *
+ */
+
+angular.module('arethusa.core').directive('pluginSettings', [
+  function () {
+    return {
+      restrict: 'A',
+      templateUrl: 'js/arethusa.core/templates/plugin_settings.html'
     };
   }
 ]);
@@ -2186,6 +2190,38 @@ angular.module('arethusa.core').directive('saver', [
 
 "use strict";
 
+angular.module('arethusa.core').directive('sentence', [
+  'navigator',
+  function(navigator) {
+    return {
+      restrict: 'A',
+      scope: {
+        sentence: '='
+      },
+      link: function(scope, element, attrs) {
+        function getCitation() {
+          navigator.getCitation(scope.sentence, function(citation) {
+            scope.citation = citation;
+          });
+        }
+
+        scope.goTo = function(id) {
+          navigator.goTo(id);
+          navigator.switchView();
+        };
+
+        scope.sentenceString = scope.sentence.toString();
+        scope.id = scope.sentence.id;
+
+        getCitation();
+      },
+      templateUrl: 'js/arethusa.core/templates/sentence.html'
+    };
+  }
+]);
+
+"use strict";
+
 angular.module('arethusa.core').directive('sentenceList', [
   '$compile',
   'navigator',
@@ -2233,38 +2269,6 @@ angular.module('arethusa.core').directive('sentenceList', [
 
 "use strict";
 
-angular.module('arethusa.core').directive('sentence', [
-  'navigator',
-  function(navigator) {
-    return {
-      restrict: 'A',
-      scope: {
-        sentence: '='
-      },
-      link: function(scope, element, attrs) {
-        function getCitation() {
-          navigator.getCitation(scope.sentence, function(citation) {
-            scope.citation = citation;
-          });
-        }
-
-        scope.goTo = function(id) {
-          navigator.goTo(id);
-          navigator.switchView();
-        };
-
-        scope.sentenceString = scope.sentence.toString();
-        scope.id = scope.sentence.id;
-
-        getCitation();
-      },
-      templateUrl: 'js/arethusa.core/templates/sentence.html'
-    };
-  }
-]);
-
-"use strict";
-
 angular.module('arethusa.core').directive('settingsTrigger', [
   'translator',
   function(translator) {
@@ -2285,6 +2289,58 @@ angular.module('arethusa.core').directive('settingsTrigger', [
         });
       },
       templateUrl: 'js/arethusa.core/templates/settings_trigger.html'
+    };
+  }
+]);
+
+"use strict";
+
+angular.module('arethusa.core').directive('sidepanel', [
+  'sidepanel',
+  'keyCapture',
+  'plugins',
+  function(sidepanel, keyCapture, plugins) {
+    return {
+      restrict: 'A',
+      link: function(scope, element, attrs) {
+        var minIndex = 0;
+
+        function currentIndex() {
+          return plugins.sub.indexOf(plugins.active);
+        }
+
+        function maxIndex() {
+          return plugins.sub.length - 1;
+        }
+
+        function selectPluginByIndex(index) {
+          var plugin = plugins.sub[index];
+          plugins.setActive(plugin);
+        }
+
+        function moveToNext() {
+          var current = currentIndex();
+          var index = current === maxIndex() ? minIndex : current + 1;
+          selectPluginByIndex(index);
+        }
+
+        function moveToPrev() {
+          var current = currentIndex();
+          var index = current === minIndex ? maxIndex() : current - 1;
+          selectPluginByIndex(index);
+        }
+
+        var keys = keyCapture.initCaptures(function(kC) {
+          return {
+            sidepanel: [
+              kC.create('nextTab', function() { kC.doRepeated(moveToNext); }, 'W'),
+              kC.create('prevTab', function() { kC.doRepeated(moveToPrev); }, 'E'),
+              kC.create('toggle',  function() { sidepanel.toggle(); }, 'q'),
+            ]
+          };
+        });
+        angular.extend(sidepanel.activeKeys, keys.sidepanel);
+      }
     };
   }
 ]);
@@ -2342,58 +2398,6 @@ angular.module('arethusa.core').directive('sidepanelFolder', [
         });
       },
       template: '<i ng-class="iconClass"/>'
-    };
-  }
-]);
-
-"use strict";
-
-angular.module('arethusa.core').directive('sidepanel', [
-  'sidepanel',
-  'keyCapture',
-  'plugins',
-  function(sidepanel, keyCapture, plugins) {
-    return {
-      restrict: 'A',
-      link: function(scope, element, attrs) {
-        var minIndex = 0;
-
-        function currentIndex() {
-          return plugins.sub.indexOf(plugins.active);
-        }
-
-        function maxIndex() {
-          return plugins.sub.length - 1;
-        }
-
-        function selectPluginByIndex(index) {
-          var plugin = plugins.sub[index];
-          plugins.setActive(plugin);
-        }
-
-        function moveToNext() {
-          var current = currentIndex();
-          var index = current === maxIndex() ? minIndex : current + 1;
-          selectPluginByIndex(index);
-        }
-
-        function moveToPrev() {
-          var current = currentIndex();
-          var index = current === minIndex ? maxIndex() : current - 1;
-          selectPluginByIndex(index);
-        }
-
-        var keys = keyCapture.initCaptures(function(kC) {
-          return {
-            sidepanel: [
-              kC.create('nextTab', function() { kC.doRepeated(moveToNext); }, 'W'),
-              kC.create('prevTab', function() { kC.doRepeated(moveToPrev); }, 'E'),
-              kC.create('toggle',  function() { sidepanel.toggle(); }, 'q'),
-            ]
-          };
-        });
-        angular.extend(sidepanel.activeKeys, keys.sidepanel);
-      }
     };
   }
 ]);
@@ -2463,6 +2467,168 @@ angular.module('arethusa.core').directive('toBottom', [
 
         setHeight();
       }
+    };
+  }
+]);
+
+'use strict';
+
+// The directive currently looks at the depTree plugin to derive info whether
+// the head of token can be changed through a click event or not.
+//
+// This is NOT a final solution, as it is flawed in several aspects.
+// There might be no depTree plugin present at all - that way it will not
+// be possible to check it. The way it is handled right now, this would
+// lead to problems: Even if the depTree plugin isn't included in the
+// application, the directive would still import it and be able to change heads,
+// as 'editor' is the default mode of all plugins.
+//
+// The solution is to abstract plugin handling one step more. This has been planned
+// for a while now, just never got the chance to really do it.
+// Abstracting plugins will also clean up the MainCtrl, who has far too many
+// responsibilites at the moment.
+angular.module('arethusa.core').directive('token', [
+  'state',
+  'globalSettings',
+  function (state, globalSettings) {
+    return {
+      restrict: 'AE',
+      scope: {
+        token: '=',
+        colorize: '=',
+        click: '@',
+        hover: '@',
+        highlight: '@'
+      },
+      link: function (scope, element, attrs) {
+        if (!scope.token) return;
+        if (!angular.isObject(scope.token)) {
+          scope.token = state.getToken(scope.token);
+        }
+
+        scope.state = state;
+        var id = scope.token.id;
+
+        function apply(fn) {
+          scope.$apply(fn());
+        }
+
+        function bindClick() {
+          element.bind('click', function (event) {
+            apply(function() {
+              var clickType = event.ctrlKey ? 'ctrl-click' : 'click';
+              if (clickType === 'click' && state.hasClickSelections()) {
+                globalSettings.clickFn(id);
+              } else {
+                state.toggleSelection(id, clickType);
+              }
+            });
+          });
+        }
+
+        function bindHover() {
+          element.bind('mouseenter', function () {
+            apply(function () {
+              state.selectToken(id, 'hover');
+            });
+          });
+          element.bind('mouseleave', function () {
+            apply(function () {
+              state.deselectToken(id, 'hover');
+            });
+          });
+        }
+
+        scope.selectionClass = function () {
+          if (state.isSelected(id)) {
+            if (state.selectionType(id) == 'hover') {
+              return 'hovered';
+            } else {
+              return 'selected';
+            }
+          }
+        };
+
+        function bindPreClick() {
+          var preClick = globalSettings.preClickFn;
+          if (preClick) {
+            angular.forEach(preClick, function(fn, eventName) {
+              element.bind(eventName, function(event) {
+                apply(function() {
+                  fn(id, element, event);
+                });
+              });
+            });
+          }
+        }
+
+        function addBindings() {
+          // It's imperative to bind any preClickFn which might hover here -
+          // otherwise it will fail to register
+          if (scope.click) {
+            bindClick();
+            element.addClass('clickable');
+            bindPreClick();
+          }
+          if (scope.hover) bindHover();
+        }
+
+        function unbind() {
+          element.removeClass('clickable');
+          element.unbind();
+        }
+
+        function updateBindings() {
+          unbind();
+          addBindings();
+        }
+
+        scope.$on('clickActionChange', updateBindings);
+
+
+        function cleanStyle() {
+          angular.forEach(scope.token.style, function (val, style) {
+            element.css(style, '');
+          });
+        }
+
+        // We have two possibilities here:
+        // When the colorize contains an attribute, the user wants
+        // to set a custom style.
+        // When it was just a boolean value of true, we look if the
+        // token itself contains style information.
+        scope.$watch('colorize', function (newVal, oldVal) {
+          if (newVal) {
+            if (angular.isObject(newVal)) {
+              element.css(newVal);
+            } else {
+              element.css(scope.token.style || {});
+            }
+          } else {
+            cleanStyle();
+          }
+        });
+        scope.$watch('token.style', function (newVal, oldVal) {
+          if (newVal !== oldVal) {
+            if (newVal) {
+              element.removeAttr('style'); // css() only modifies properties!
+              element.css(newVal);
+            } else {
+              cleanStyle();
+            }
+          }
+        }, true);
+
+        // Special handling of articial tokens
+        if (scope.token.artificial) {
+          element.addClass(scope.token.type);
+        }
+
+        element.addClass('token');
+
+        addBindings();
+      },
+      templateUrl: 'js/templates/token.html'
     };
   }
 ]);
@@ -2630,168 +2796,6 @@ angular.module('arethusa.core').directive('tokenWithId', [
   }
 ]);
 
-
-'use strict';
-
-// The directive currently looks at the depTree plugin to derive info whether
-// the head of token can be changed through a click event or not.
-//
-// This is NOT a final solution, as it is flawed in several aspects.
-// There might be no depTree plugin present at all - that way it will not
-// be possible to check it. The way it is handled right now, this would
-// lead to problems: Even if the depTree plugin isn't included in the
-// application, the directive would still import it and be able to change heads,
-// as 'editor' is the default mode of all plugins.
-//
-// The solution is to abstract plugin handling one step more. This has been planned
-// for a while now, just never got the chance to really do it.
-// Abstracting plugins will also clean up the MainCtrl, who has far too many
-// responsibilites at the moment.
-angular.module('arethusa.core').directive('token', [
-  'state',
-  'globalSettings',
-  function (state, globalSettings) {
-    return {
-      restrict: 'AE',
-      scope: {
-        token: '=',
-        colorize: '=',
-        click: '@',
-        hover: '@',
-        highlight: '@'
-      },
-      link: function (scope, element, attrs) {
-        if (!scope.token) return;
-        if (!angular.isObject(scope.token)) {
-          scope.token = state.getToken(scope.token);
-        }
-
-        scope.state = state;
-        var id = scope.token.id;
-
-        function apply(fn) {
-          scope.$apply(fn());
-        }
-
-        function bindClick() {
-          element.bind('click', function (event) {
-            apply(function() {
-              var clickType = event.ctrlKey ? 'ctrl-click' : 'click';
-              if (clickType === 'click' && state.hasClickSelections()) {
-                globalSettings.clickFn(id);
-              } else {
-                state.toggleSelection(id, clickType);
-              }
-            });
-          });
-        }
-
-        function bindHover() {
-          element.bind('mouseenter', function () {
-            apply(function () {
-              state.selectToken(id, 'hover');
-            });
-          });
-          element.bind('mouseleave', function () {
-            apply(function () {
-              state.deselectToken(id, 'hover');
-            });
-          });
-        }
-
-        scope.selectionClass = function () {
-          if (state.isSelected(id)) {
-            if (state.selectionType(id) == 'hover') {
-              return 'hovered';
-            } else {
-              return 'selected';
-            }
-          }
-        };
-
-        function bindPreClick() {
-          var preClick = globalSettings.preClickFn;
-          if (preClick) {
-            angular.forEach(preClick, function(fn, eventName) {
-              element.bind(eventName, function(event) {
-                apply(function() {
-                  fn(id, element, event);
-                });
-              });
-            });
-          }
-        }
-
-        function addBindings() {
-          // It's imperative to bind any preClickFn which might hover here -
-          // otherwise it will fail to register
-          if (scope.click) {
-            bindClick();
-            element.addClass('clickable');
-            bindPreClick();
-          }
-          if (scope.hover) bindHover();
-        }
-
-        function unbind() {
-          element.removeClass('clickable');
-          element.unbind();
-        }
-
-        function updateBindings() {
-          unbind();
-          addBindings();
-        }
-
-        scope.$on('clickActionChange', updateBindings);
-
-
-        function cleanStyle() {
-          angular.forEach(scope.token.style, function (val, style) {
-            element.css(style, '');
-          });
-        }
-
-        // We have two possibilities here:
-        // When the colorize contains an attribute, the user wants
-        // to set a custom style.
-        // When it was just a boolean value of true, we look if the
-        // token itself contains style information.
-        scope.$watch('colorize', function (newVal, oldVal) {
-          if (newVal) {
-            if (angular.isObject(newVal)) {
-              element.css(newVal);
-            } else {
-              element.css(scope.token.style || {});
-            }
-          } else {
-            cleanStyle();
-          }
-        });
-        scope.$watch('token.style', function (newVal, oldVal) {
-          if (newVal !== oldVal) {
-            if (newVal) {
-              element.removeAttr('style'); // css() only modifies properties!
-              element.css(newVal);
-            } else {
-              cleanStyle();
-            }
-          }
-        }, true);
-
-        // Special handling of articial tokens
-        if (scope.token.artificial) {
-          element.addClass(scope.token.type);
-        }
-
-        element.addClass('token');
-
-        addBindings();
-      },
-      templateUrl: 'js/templates/token.html'
-    };
-  }
-]);
 
 "use strict";
 
@@ -3415,6 +3419,90 @@ angular.module('arethusa.core').factory('Resource', [
   }
 ]);
 
+"use strict";
+
+/**
+ * @ngdoc service
+ * @name arethusa.core.StateChange
+ *
+ * @description
+ * Returns a constructor function, which is `new`'ed during a
+ * the execution {@link arethusa.core.state#methods_change state.change}.
+ *
+ * Generally not meant to be executed by hand. The resulting object
+ * is the third argument to the callback registered through a call
+ * of {@link arethusa.core.state#methods_watch state.watch}.
+ *
+ * @property {Token} token The token object, which has been changed.
+ * @property {String} property The property which has changed, e.g. `'head.id'`
+ * @property {*} newVal New value of the `property` after the change
+ * @property {*} oldVal Old value of the `property` before the change
+ * @property {Date} time Time when the change has happened
+ * @property {fn} undoFn Function to undo a change. Typically triggers another
+ *   {@link arethusa.core.state#methods_change state.change} call.
+ * @property {fn} exec Function to trigger the change - setting the `newVal`
+ *   on the `property` of the `token`.
+ *
+ *   Broadcasts a `tokenChange` event on the `$rootScope` with itself
+ *   (the `StateChange` object) as argument and notifies all listeners
+ *   registered through {@link arethusa.core.state#methods_watch state.watch}.
+ *
+ *   Returns itself.
+ *
+ */
+angular.module('arethusa.core').factory('StateChange', [
+  '$parse',
+  function($parse) {
+    function getToken(state, tokenOrId) {
+      if (angular.isObject(tokenOrId)) {
+        return tokenOrId;
+      } else {
+        return state.getToken(tokenOrId);
+      }
+    }
+
+    return function(state, tokenOrId, property, newVal, undoFn, preExecFn) {
+      var self = this;
+
+      var get = $parse(property);
+      var set = get.assign;
+
+      this.token = getToken(state, tokenOrId);
+      this.property = property;
+      this.newVal = newVal;
+      this.oldVal = get(self.token);
+      this.type   = 'change';
+      this.time = new Date();
+
+      function inverse() {
+        state.change(self.token, property, self.oldVal);
+      }
+
+      this.undo   = function() {
+        return angular.isFunction(undoFn) ? undoFn() : inverse();
+      };
+
+      this.exec   = function() {
+        if (angular.isFunction(preExecFn)) preExecFn();
+
+        set(self.token, self.newVal);
+
+        // It might seem redundant to broadcast this event, when listeners
+        // could just use state.watch().
+        // But it's not: Depending the time of init, a listener might not
+        // have the chance to inject state - he has to listen through a
+        // $scope then. In addition, $on brings some additional info about
+        // the scope in use etc., which might be handy at times. We won't
+        // replicate this in state.watch(), as most of the time it's overkill.
+        state.broadcast('tokenChange', self);
+        state.notifyWatchers(self);
+
+        return self;
+      };
+    };
+  }
+]);
+
 'use strict';
 /**
  * @ngdoc service
@@ -3521,113 +3609,6 @@ angular.module('arethusa.core').factory('StateChangeWatcher', [
     };
   }
 ]);
-
-"use strict";
-
-/**
- * @ngdoc service
- * @name arethusa.core.StateChange
- *
- * @description
- * Returns a constructor function, which is `new`'ed during a
- * the execution {@link arethusa.core.state#methods_change state.change}.
- *
- * Generally not meant to be executed by hand. The resulting object
- * is the third argument to the callback registered through a call
- * of {@link arethusa.core.state#methods_watch state.watch}.
- *
- * @property {Token} token The token object, which has been changed.
- * @property {String} property The property which has changed, e.g. `'head.id'`
- * @property {*} newVal New value of the `property` after the change
- * @property {*} oldVal Old value of the `property` before the change
- * @property {Date} time Time when the change has happened
- * @property {fn} undoFn Function to undo a change. Typically triggers another
- *   {@link arethusa.core.state#methods_change state.change} call.
- * @property {fn} exec Function to trigger the change - setting the `newVal`
- *   on the `property` of the `token`.
- *
- *   Broadcasts a `tokenChange` event on the `$rootScope` with itself
- *   (the `StateChange` object) as argument and notifies all listeners
- *   registered through {@link arethusa.core.state#methods_watch state.watch}.
- *
- *   Returns itself.
- *
- */
-angular.module('arethusa.core').factory('StateChange', [
-  '$parse',
-  function($parse) {
-    function getToken(state, tokenOrId) {
-      if (angular.isObject(tokenOrId)) {
-        return tokenOrId;
-      } else {
-        return state.getToken(tokenOrId);
-      }
-    }
-
-    return function(state, tokenOrId, property, newVal, undoFn, preExecFn) {
-      var self = this;
-
-      var get = $parse(property);
-      var set = get.assign;
-
-      this.token = getToken(state, tokenOrId);
-      this.property = property;
-      this.newVal = newVal;
-      this.oldVal = get(self.token);
-      this.type   = 'change';
-      this.time = new Date();
-
-      function inverse() {
-        state.change(self.token, property, self.oldVal);
-      }
-
-      this.undo   = function() {
-        return angular.isFunction(undoFn) ? undoFn() : inverse();
-      };
-
-      this.exec   = function() {
-        if (angular.isFunction(preExecFn)) preExecFn();
-
-        set(self.token, self.newVal);
-
-        // It might seem redundant to broadcast this event, when listeners
-        // could just use state.watch().
-        // But it's not: Depending the time of init, a listener might not
-        // have the chance to inject state - he has to listen through a
-        // $scope then. In addition, $on brings some additional info about
-        // the scope in use etc., which might be handy at times. We won't
-        // replicate this in state.watch(), as most of the time it's overkill.
-        state.broadcast('tokenChange', self);
-        state.notifyWatchers(self);
-
-        return self;
-      };
-    };
-  }
-]);
-
-'use strict';
-
-/**
- * @ngdoc service
- * @name arethusa.core.translatorNullInterpolator
- *
- * @description
- * Additional interpolation service for angular-translate.
- * Requirement for {@link arethusa.core.translator}.
- *
- * This interpolator service does nothing and allows to disable
- * `angular-translate`'s interpolation.
- *
- * Use it by calling `$translateProvider.addInterpolator('nullInterpolator')`.
- */
-angular.module('arethusa.core').factory('translatorNullInterpolator', function() {
-  return {
-    getInterpolationIdentifier: function() { return 'nullInterpolator'; },
-    interpolate: function(string) { return string; },
-    setLocale: function() {}
-  };
-});
 
 "use strict";
 
@@ -3781,6 +3762,29 @@ angular.module('arethusa.core').factory('translator', [
     };
   }
 ]);
+
+'use strict';
+
+/**
+ * @ngdoc service
+ * @name arethusa.core.translatorNullInterpolator
+ *
+ * @description
+ * Additional interpolation service for angular-translate.
+ * Requirement for {@link arethusa.core.translator}.
+ *
+ * This interpolator service does nothing and allows to disable
+ * `angular-translate`'s interpolation.
+ *
+ * Use it by calling `$translateProvider.addInterpolator('nullInterpolator')`.
+ */
+angular.module('arethusa.core').factory('translatorNullInterpolator', function() {
+  return {
+    getInterpolationIdentifier: function() { return 'nullInterpolator'; },
+    interpolate: function(string) { return string; },
+    setLocale: function() {}
+  };
+});
 
 "use strict";
 
@@ -9497,6 +9501,21 @@ angular.module('arethusa.core').constant('LOCALES', [
 angular.module('arethusa.core').run(['$templateCache', function($templateCache) {
   'use strict';
 
+  $templateCache.put('js/arethusa.core/templates/arethusa_grid.html',
+    "<div gridster=\"grid.options\">\n" +
+    "  <ul>\n" +
+    "    <li\n" +
+    "      gridster-item=\"item\"\n" +
+    "      ng-style=\"item.style\"\n" +
+    "      ng-repeat=\"item in grid.items track by item.plugin\">\n" +
+    "      <arethusa-grid-handle>Handle</arethusa-grid-handle>\n" +
+    "      <plugin name=\"{{ item.plugin }}\"></plugin>\n" +
+    "    </li>\n" +
+    "  </ul>\n" +
+    "</div>\n"
+  );
+
+
   $templateCache.put('js/arethusa.core/templates/arethusa_grid_handle.html',
     "<div class=\"drag-handle-trigger\">\n" +
     "  <div class=\"drag-handle fade\" ng-show=\"visible\">\n" +
@@ -9514,21 +9533,6 @@ angular.module('arethusa.core').run(['$templateCache', function($templateCache) 
     "      </div>\n" +
     "    </div>\n" +
     "  </div>\n" +
-    "</div>\n"
-  );
-
-
-  $templateCache.put('js/arethusa.core/templates/arethusa_grid.html',
-    "<div gridster=\"grid.options\">\n" +
-    "  <ul>\n" +
-    "    <li\n" +
-    "      gridster-item=\"item\"\n" +
-    "      ng-style=\"item.style\"\n" +
-    "      ng-repeat=\"item in grid.items track by item.plugin\">\n" +
-    "      <arethusa-grid-handle>Handle</arethusa-grid-handle>\n" +
-    "      <plugin name=\"{{ item.plugin }}\"></plugin>\n" +
-    "    </li>\n" +
-    "  </ul>\n" +
     "</div>\n"
   );
 
@@ -9814,20 +9818,6 @@ angular.module('arethusa.core').run(['$templateCache', function($templateCache) 
   );
 
 
-  $templateCache.put('js/arethusa.core/templates/help_panel_item.html',
-    "<div delimiter/>\n" +
-    "<div class=\"text\">\n" +
-    "  <div help-panel-heading toggler=\"{{ toggler }}\" heading=\"{{ heading }}\"/>\n" +
-    "  <div\n" +
-    "    class=\"small-12 columns scrollable slider\"\n" +
-    "    style=\"height: {{ height }}\"\n" +
-    "    ng-if=\"visible[toggler]\"\n" +
-    "    ng-transclude>\n" +
-    "  </div>\n" +
-    "</div>\n"
-  );
-
-
   $templateCache.put('js/arethusa.core/templates/help_panel.html',
     "<div ng-if=\"active\" class=\"fade small-12-columns\">\n" +
     "  <div class=\"small-6 large-6 columns\">\n" +
@@ -9933,6 +9923,20 @@ angular.module('arethusa.core').run(['$templateCache', function($templateCache) 
   );
 
 
+  $templateCache.put('js/arethusa.core/templates/help_panel_item.html',
+    "<div delimiter/>\n" +
+    "<div class=\"text\">\n" +
+    "  <div help-panel-heading toggler=\"{{ toggler }}\" heading=\"{{ heading }}\"/>\n" +
+    "  <div\n" +
+    "    class=\"small-12 columns scrollable slider\"\n" +
+    "    style=\"height: {{ height }}\"\n" +
+    "    ng-if=\"visible[toggler]\"\n" +
+    "    ng-transclude>\n" +
+    "  </div>\n" +
+    "</div>\n"
+  );
+
+
   $templateCache.put('js/arethusa.core/templates/keys_to_screen.html',
     "<div id=\"keys-to-screen\">\n" +
     "  <span\n" +
@@ -9961,6 +9965,21 @@ angular.module('arethusa.core').run(['$templateCache', function($templateCache) 
   );
 
 
+  $templateCache.put('js/arethusa.core/templates/navbar_buttons.html',
+    "<li><a class=\"button\" saver/></li>\n" +
+    "<li><a class=\"button\" outputter/></li>\n" +
+    "<li><a class=\"button\" hist-undo/></li>\n" +
+    "<li><a class=\"button\" hist-redo/></li>\n" +
+    "<li><a class=\"button\" sidepanel-folder/></li>\n" +
+    "<li><a class=\"button\" uservoice-trigger/></li>\n" +
+    "<li><a class=\"button\" global-settings-trigger/></li>\n" +
+    "<li><a class=\"button\" help-trigger/></li>\n" +
+    "<li><a class=\"button\" translate-language/></li>\n" +
+    "<li><a class=\"button\" exit/></li>\n" +
+    "\n"
+  );
+
+
   $templateCache.put('js/arethusa.core/templates/navbar_buttons_collapsed.html',
     "<li><a class=\"button\" saver/></li>\n" +
     "<li><a class=\"button\" hist-undo/></li>\n" +
@@ -9982,21 +10001,6 @@ angular.module('arethusa.core').run(['$templateCache', function($templateCache) 
     "    <li><a exit/></li>\n" +
     "  </ul>\n" +
     "</li>\n"
-  );
-
-
-  $templateCache.put('js/arethusa.core/templates/navbar_buttons.html',
-    "<li><a class=\"button\" saver/></li>\n" +
-    "<li><a class=\"button\" outputter/></li>\n" +
-    "<li><a class=\"button\" hist-undo/></li>\n" +
-    "<li><a class=\"button\" hist-redo/></li>\n" +
-    "<li><a class=\"button\" sidepanel-folder/></li>\n" +
-    "<li><a class=\"button\" uservoice-trigger/></li>\n" +
-    "<li><a class=\"button\" global-settings-trigger/></li>\n" +
-    "<li><a class=\"button\" help-trigger/></li>\n" +
-    "<li><a class=\"button\" translate-language/></li>\n" +
-    "<li><a class=\"button\" exit/></li>\n" +
-    "\n"
   );
 
 
@@ -10120,6 +10124,13 @@ angular.module('arethusa.core').run(['$templateCache', function($templateCache) 
   );
 
 
+  $templateCache.put('js/arethusa.core/templates/outputter.html',
+    "<div class=\"outputter\">\n" +
+    "  <div outputter-item ng-repeat=\"(name, obj) in saver.outputters\"/>\n" +
+    "</div>\n"
+  );
+
+
   $templateCache.put('js/arethusa.core/templates/outputter_item.html',
     "<div>\n" +
     "  <span class=\"italic\">{{ obj.identifier }}</span>\n" +
@@ -10143,9 +10154,12 @@ angular.module('arethusa.core').run(['$templateCache', function($templateCache) 
   );
 
 
-  $templateCache.put('js/arethusa.core/templates/outputter.html',
-    "<div class=\"outputter\">\n" +
-    "  <div outputter-item ng-repeat=\"(name, obj) in saver.outputters\"/>\n" +
+  $templateCache.put('js/arethusa.core/templates/plugin.html',
+    "<div\n" +
+    "  id=\"{{ plugin.name }}\"\n" +
+    "  class=\"fade very-slow\">\n" +
+    "  <div ng-if=\"withSettings && plugin.settings\" plugin-settings/>\n" +
+    "  <div ng-include=\"plugin.template\"/>\n" +
     "</div>\n"
   );
 
@@ -10171,16 +10185,6 @@ angular.module('arethusa.core').run(['$templateCache', function($templateCache) 
     "      <span ng-if=\"!setting.directive\" plugin-setting/>\n" +
     "    </span>\n" +
     "  </span>\n" +
-    "</div>\n"
-  );
-
-
-  $templateCache.put('js/arethusa.core/templates/plugin.html',
-    "<div\n" +
-    "  id=\"{{ plugin.name }}\"\n" +
-    "  class=\"fade very-slow\">\n" +
-    "  <div ng-if=\"withSettings && plugin.settings\" plugin-settings/>\n" +
-    "  <div ng-include=\"plugin.template\"/>\n" +
     "</div>\n"
   );
 

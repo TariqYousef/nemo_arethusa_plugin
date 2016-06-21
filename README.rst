@@ -15,7 +15,11 @@ Arethusa for CapiTainS Nemo
 .. image:: https://badge.fury.io/py/nemo_arethusa_plugin.svg
     :target: https://badge.fury.io/py/nemo_arethusa_plugin
 
-This repository contains a plugin for embedding Arethusa in `Flask Capitains Nemo <https://github.com/capitains/flask-capitains-nemo>`_. It was produced during the Perseids Tufts Hackathon in May 2016.
+This repository contains a plugin for embedding Arethusa in `Flask Capitains Nemo <https://github.com/capitains/flask-capitains-nemo>`_.
+It was produced during the Perseids Tufts Hackathon in May 2016.
+
+The version of the Arethusa code which is used here can be found at https://github.com/alpheios-project/arethusa/tree/nemo_arethusa_widget
+It is currently using commit 924f384.
 
 Contributors
 ############
